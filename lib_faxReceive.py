@@ -24,11 +24,58 @@ class FaxReceive():
         # self.observer.start()
     
     
-    def get_directory_file(self):
+    def __get_directory_file(self):
         load_files = glob.glob(self.DIRECTOR_PATH +'/*.*')
         return  [file for file in load_files if file.endswith('.jpg')]
     
+    def __get_sorted_faxfiles(self,file_list):
+        checked_list = []
+        unchecked_list = [] 
+        
+        file_list.sort(key=os.path.getmtime)
+
+        for f in file_list:
+            if os.path.basename(f)[0] == 'v':
+                checked_list.append(f)
+            else :
+                unchecked_list.append(f)
+        return unchecked_list, checked_list
     
+    def get_faxfiles(self):
+        return self.__get_sorted_faxfiles(self.__get_directory_file())     
+    
+    
+    def Rename_file(self, src_file, dst_name):
+        if os.path.isfile(src_file):
+        
+            file_path, file_name_ext = os.path.split(src_file)
+            file_name , file_ext = os.path.splitext(file_name_ext)
+            
+            if file_name[0] == 'v':
+                dst_file_name = file_name.lstrip('v_')
+            else : 
+                if dst_name is not None :
+                    file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(src_file)))
+                    dst_file_name = f'v_{dst_name}_{file_ctime}'
+                else : 
+                    dst_file_name = 'v_' + file_name
+            print(f'src_file : {src_file}')
+            print(f'dst_file : {file_path}/{dst_file_name}{file_ext}')
+            # os.rename(src_file, f'{file_path}{dst_file_name}.{file_ext}')
+                    
+        else :
+            print(f'Rename_file error : {src_file} is not found')
+    
+    def Delete_file(self, src_file):
+        print(f'Delete_file={src_file}')
+        
+        if os.path.isfile(src_file):
+            os.remove(src_file)
+        else : 
+            print(f"Delete_file error : {src_file} is not found")
+        
+                
+            
     # def event_handler(self):
     #     print('event_handler')
 

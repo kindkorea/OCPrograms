@@ -24,8 +24,8 @@ class App(tk.Tk):
         # create the input frame
         input_frame = gui_pdf2jpg.Pdf2jpg(self,8)
         input_frame.grid(column=0, row=0, pady = 20)
-        # fax_receive = gui_faxReceive.GUI_FaxReceive(self)
-        # fax_receive.grid(column=0, row=1)
+        fax_receive = gui_faxReceive.GUI_FaxReceive(self)
+        fax_receive.grid(column=0, row=1)
         # # create the button frame
         # button_frame = gui_pdf2jpg.Cb_Btn_frame(self,8)
         # button_frame.grid(column=0, row=1)
