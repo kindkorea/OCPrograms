@@ -5,11 +5,20 @@ import gui_pdf2jpg
 import gui_faxReceive
 
 
+
+# Function will remove selected Listbox items 
+
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Replace')
         self.geometry('500x500+2000+100')
+        self.FAX_DIRECTOR_PATH = 'C:/Users/kindk/.vscode/test/'
+        # self.FAX_DIRECTOR_PATH = 'C:/Users/kindk/OneDrive/OCWOOD_OFFICE/FAX_received/'
+        # ico = tk.PhotoImage(file='./peach.png')
+        # self.iconphoto(default=False, ico)   
+        # self.iconphoto(default=False, tk.PhotoImage(file='./peach.png'))   
         # self.resizable(0, 0)
         # windows only (remove the minimize/maximize button)
         # self.attributes('-toolwindow', True)
@@ -24,7 +33,7 @@ class App(tk.Tk):
         # create the input frame
         input_frame = gui_pdf2jpg.Pdf2jpg(self,8)
         input_frame.grid(column=0, row=0, pady = 20)
-        fax_receive = gui_faxReceive.GUI_FaxReceive(self)
+        fax_receive = gui_faxReceive.GUI_FaxReceive(self, self.FAX_DIRECTOR_PATH)
         fax_receive.grid(column=0, row=1)
         # # create the button frame
         # button_frame = gui_pdf2jpg.Cb_Btn_frame(self,8)

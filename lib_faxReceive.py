@@ -1,32 +1,18 @@
 import os
 import glob
 import time
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-from queue import Queue
-import sys
-import subprocess
 
-
+    
 class FaxReceive():
     def __init__(self,dir_path):
         
         self.DIRECTOR_PATH = dir_path
         self.selected_file =''
         # self.src_path = self.DIRECTOR_PATH
-        
-
-        # Observer 생성
-        # handler = CustomHandler(self)
-        # self.observer = Observer()
-        # self.observer.schedule(handler, self.DIRECTOR_PATH, recursive=True)
-        # self.queue = Queue()
-        # self.observer.start()
-    
     
     def __get_directory_file(self):
-        load_files = glob.glob(self.DIRECTOR_PATH +'/*.*')
-        return  [file for file in load_files if file.endswith('.jpg')]
+        return  glob.glob(self.DIRECTOR_PATH +'/*.*')
+        # return  [file for file in load_files if file.endswith('.jpg')]
     
     def __get_sorted_faxfiles(self,file_list):
         checked_list = []
@@ -48,20 +34,12 @@ class FaxReceive():
     def Rename_file(self, src_file, dst_name):
         if os.path.isfile(src_file):
         
-            file_path, file_name_ext = os.path.split(src_file)
-            file_name , file_ext = os.path.splitext(file_name_ext)
-            
-            if file_name[0] == 'v':
-                dst_file_name = file_name.lstrip('v_')
-            else : 
-                if dst_name is not None :
-                    file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(src_file)))
-                    dst_file_name = f'v_{dst_name}_{file_ctime}'
-                else : 
-                    dst_file_name = 'v_' + file_name
+            file_ext = os.path.splitext(src_file)[1] 
+            file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(src_file)))
+            dst_file_name = f'{self.DIRECTOR_PATH}{dst_name}_{file_ctime}{file_ext}'
             print(f'src_file : {src_file}')
-            print(f'dst_file : {file_path}/{dst_file_name}{file_ext}')
-            # os.rename(src_file, f'{file_path}{dst_file_name}.{file_ext}')
+            print(f'dst_file : {dst_file_name}')
+            os.rename(src_file, dst_file_name)
                     
         else :
             print(f'Rename_file error : {src_file} is not found')
@@ -74,8 +52,7 @@ class FaxReceive():
         else : 
             print(f"Delete_file error : {src_file} is not found")
         
-                
-            
+   
     # def event_handler(self):
     #     print('event_handler')
 

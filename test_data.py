@@ -1,23 +1,17 @@
-from tkinter import*
-root=Tk()
-sizex = 600
-sizey = 400
-posx  = 40
-posy  = 20
-root.wm_geometry("%dx%d+%d+%d" % (sizex, sizey, posx, posy))
-itemsforlistbox=['one','two','three','four','five','six','seven']
+import os
 
-def CurSelet(event):
-    widget = event.widget
-    selection=widget.curselection()
-    picked = widget.get(selection[0])
-    print(selection)
-    print(picked)
 
-mylistbox=Listbox(root,width=60,height=10,font=('times',13))
-mylistbox.bind('<<ListboxSelect>>',CurSelet)
-mylistbox.place(x=32,y=90)
+path = 'c:/Users/kindk/.vscode/test/'
+f = 'c:/Users/kindk/.vscode/test/FAX__20231208_092455.jpg'
 
-for items in itemsforlistbox:
-    mylistbox.insert(END,items)
-root.mainloop()
+# name = os.path.basename(f)
+# name = os.path.splitext(f)	
+# name = os.path.splitext(f)
+
+ext = os.path.splitext(f)[1]
+
+filename = 'hellow'
+
+full = path + filename + ext
+
+print(full)
