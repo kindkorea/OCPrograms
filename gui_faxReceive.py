@@ -85,7 +85,7 @@ class GUI_FaxReceive(Frame):
         elif code == 113: #key : F2
             self.__func_rename()
         elif code == 13: #key : enter
-            f  = f'{self.DIRECTOR_PATH}{self.__selected_src_file()}'
+            f  = self.__selected_src_file()
             self.__run_with_viewer(f)
         # elif code == 38:  #key : up
         #     print('up')     
@@ -95,7 +95,7 @@ class GUI_FaxReceive(Frame):
     def __handler_mouse(self,event):
         if not event.widget.curselection():
             return
-        f  = f'{self.DIRECTOR_PATH}{self.__selected_src_file()}'
+        f  = self.__selected_src_file()
         self.__run_with_viewer(f)
         
         
@@ -116,22 +116,27 @@ class GUI_FaxReceive(Frame):
     
     def __func_check(self):
         print('checked')
+        f = self.__selected_src_file()
+        
+        self.FAX_R.Checking_file(f)
+        self.__reset_listbox()
         
         
         
     def __func_delete(self):
-        f = f'{self.DIRECTOR_PATH}{self.__selected_src_file()}'
+        f = self.__selected_src_file()
         self.FAX_R.Delete_file(f)
         self.__reset_listbox()
         
     def __selected_src_file(self):
         index = self.file_listbox.curselection()[0]
         if index is not None: # if the tuple is not empty
-            return self.file_listbox.get(index)  
-        
+            return f'{self.DIRECTOR_PATH}{self.file_listbox.get(index)}'
+    
+    
     
     def __func_rename(self):     
-        src_file = f'{self.DIRECTOR_PATH}{self.__selected_src_file()}'
+        src_file = self.__selected_src_file()
         if src_file is None:
             msg.showinfo(title='Re:name', message='No chose file')
             return
@@ -147,6 +152,7 @@ class GUI_FaxReceive(Frame):
         self.__reset_listbox()
         self.refile_name.delete(0,END)
 
+    
 
     def __run_with_viewer(self, src_file):
         cmd = f'{self.extention_viewer} {src_file}'

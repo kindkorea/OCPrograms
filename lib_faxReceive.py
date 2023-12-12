@@ -33,10 +33,27 @@ class FaxReceive():
     
     def Rename_file(self, src_file, dst_name):
         if os.path.isfile(src_file):
-        
             file_ext = os.path.splitext(src_file)[1] 
             file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(src_file)))
             dst_file_name = f'{self.DIRECTOR_PATH}{dst_name}_{file_ctime}{file_ext}'
+            print(f'src_file : {src_file}')
+            print(f'dst_file : {dst_file_name}')
+            os.rename(src_file, dst_file_name)
+                    
+        else :
+            print(f'Rename_file error : {src_file} is not found')
+    
+    def Checking_file(self, src_file):
+        if os.path.isfile(src_file):
+            f_name = os.path.basename(src_file)
+            print(f'Checking_file {f_name=}')
+            
+            if f_name[0] == 'v':
+                d_name = f_name.split('_')
+            # file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(src_file)))
+                dst_file_name = f'{self.DIRECTOR_PATH}{d_name}'
+            else :
+                dst_file_name = f'{self.DIRECTOR_PATH}v_{f_name}'
             print(f'src_file : {src_file}')
             print(f'dst_file : {dst_file_name}')
             os.rename(src_file, dst_file_name)
