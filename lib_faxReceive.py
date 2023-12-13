@@ -1,17 +1,36 @@
 import os
 import glob
 import time
+import sys
+import subprocess
 
-    
+
 class FaxReceive():
-    def __init__(self,dir_path):
+    def __init__(self, fax_path):
         
-        self.DIRECTOR_PATH = dir_path
-        self.selected_file =''
+        # self.DIRECTOR_PATH = dir_path
+        self.__selected_file =''
         # self.src_path = self.DIRECTOR_PATH
+        self.EXTENTION_VIEWER = 'c:/Users/kindk/AppData/Local/Imagine/Imagine64.exe'
+        # self.FAX_DIRECTOR_PATH = 'C:/Users/kindk/OneDrive/OCWOOD_OFFICE/FAX_received/'
+        self.FAX_DIRECTOR_PATH = fax_path 
+        
+    @property
+    def selectitem(self):
+        return self.__selected_file
     
+    @selectitem.setter
+    def selectitem(self, file):
+        self.__selected_file = file
+
+    @property
+    def selectedfile(self):
+        return f'{self.FAX_DIRECTOR_PATH}{self.selectitem}'
+    
+
+        
     def __get_directory_file(self):
-        return  glob.glob(self.DIRECTOR_PATH +'/*.*')
+        return  glob.glob(self.FAX_DIRECTOR_PATH +'/*.*')
         # return  [file for file in load_files if file.endswith('.jpg')]
     
     def __get_sorted_faxfiles(self,file_list):
@@ -21,7 +40,7 @@ class FaxReceive():
         file_list.sort(key=os.path.getmtime)
 
         for f in file_list:
-            if os.path.basename(f)[0] == 'v':
+            if os.path.basename(f)[1] == 'v':
                 checked_list.append(f)
             else :
                 unchecked_list.append(f)
@@ -31,141 +50,48 @@ class FaxReceive():
         return self.__get_sorted_faxfiles(self.__get_directory_file())     
     
     
-    def Rename_file(self, src_file, dst_name):
-        if os.path.isfile(src_file):
-            file_ext = os.path.splitext(src_file)[1] 
-            file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(src_file)))
-            dst_file_name = f'{self.DIRECTOR_PATH}{dst_name}_{file_ctime}{file_ext}'
-            print(f'src_file : {src_file}')
-            print(f'dst_file : {dst_file_name}')
-            os.rename(src_file, dst_file_name)
+    def Rename_file(self, dst_name):
+        if os.path.isfile(self.selectedfile):
+            file_ext = os.path.splitext(self.selectedfile)[1] 
+            file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(self.selectedfile)))
+            dst_file_name = f'{self.FAX_DIRECTOR_PATH}{dst_name}_{file_ctime}{file_ext}'
+            # print(f'src_file : {src_file}')
+            # print(f'dst_file : {dst_file_name}')
+            os.rename(self.selectedfile, dst_file_name)
                     
         else :
             print(f'Rename_file error : {src_file} is not found')
     
-    def Checking_file(self, src_file):
-        if os.path.isfile(src_file):
-            f_name = os.path.basename(src_file)
-            print(f'Checking_file {f_name=}')
+    def Checking_file(self):
+        if os.path.isfile(self.selectedfile):
+            f_name = os.path.basename(self.selectedfile)
+            # print(f'Checking_file {f_name=}')
             
-            if f_name[0] == 'v':
-                d_name = f_name.split('_')
-            # file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(src_file)))
-                dst_file_name = f'{self.DIRECTOR_PATH}{d_name}'
+            if f_name[1] == 'v':
+                d_name = f_name.split('[v]')
+                dst_file_name = f'{self.FAX_DIRECTOR_PATH}{d_name[1]}'
             else :
-                dst_file_name = f'{self.DIRECTOR_PATH}v_{f_name}'
-            print(f'src_file : {src_file}')
-            print(f'dst_file : {dst_file_name}')
-            os.rename(src_file, dst_file_name)
+                dst_file_name = f'{self.FAX_DIRECTOR_PATH}[v]{f_name}'
+            print(f'Checking_file src_file : {self.selectedfile}')
+            print(f'Checking_file dst_file : {dst_file_name}')
+            os.rename(self.selectedfile, dst_file_name)
                     
         else :
             print(f'Rename_file error : {src_file} is not found')
     
-    def Delete_file(self, src_file):
-        print(f'Delete_file={src_file}')
+    def Delete_file(self):
+        print(f'Delete_file={self.selectedfile}')
         
-        if os.path.isfile(src_file):
-            os.remove(src_file)
+        if os.path.isfile(self.selectedfile):
+            os.remove(self.selectedfile)
         else : 
-            print(f"Delete_file error : {src_file} is not found")
+            print(f"Delete_file error : {self.selectedfile} is not found")
         
-   
-    # def event_handler(self):
-    #     print('event_handler')
-
-    # def check_v_file(self,filename):
-    #     self.company_name.delete(0,'end')
-    #     self.company_name.insert(0,filename.split('_')[0])  
-    #     # self.txt_value_entry = 'hello'
-
-    #     if filename[0] == 'v' :
-    #         self.chk_active.set(True)
-    #         return True
-    #     else :
-    #         self.chk_active.set(False)
-    #         return False
-
-    # def items_selected(self,event):
-    #     if not event.widget.curselection():
-    #         return
-    #     selected_indices = self.listbox.curselection()[0]
-    #     self.src_file = self.listbox.get(selected_indices)
-    #     self.check_v_file(os.path.basename(self.src_file))
-
-    #     print(self.src_file)
-        # print(selected_indices)
-        # if selected_indices:
-        #     # index = selected_indices[0]
-        #     self.src_file = self.listbox.get(selected_indices)
-        #     self.reload_file(os.path.basename(self.src_file))
-        #     # self.company_name.select_adjust(tkinter.END)
-        # else:
-        #     print("No entry") 
-    
-
-    # def items_doubleClicked(self,event):
-    #     if not event.widget.curselection():
-    #         return
-    #     selected_indices = self.listbox.curselection()[0]
-    #     self.src_file = self.listbox.get(selected_indices)
-    #     subprocess.Popen(f'c:/imagine/imagine64.exe {self.src_file}')
-
-        # selected_indices = self.listbox.curselection()
-        # msg = self.listbox.get(selected_indices[0])
-        # os.system(f'./img/{msg}')
-
-
-
-    # def FAX_rename(self, dst_file, is_checked) :
+    def Run_with_viewer(self):
+        cmd = f'{self.EXTENTION_VIEWER} {self.selectedfile}'
+        print(f'__run_with_viewer = {cmd}')
+        subprocess.Popen(cmd)
         
-    #         try :
-    #             # creation_time = time.gmtime(os.path.getctime(self.src_file))
-    #             file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(self.src_file)))
-
-    #             file_path, file_name_ext = os.path.split(self.src_file)
-    #             file_name , file_ext = os.path.splitext(file_name_ext)
-
-    #             if is_checked :
-    #                 dst_file_name = f'v_{dst_file}'
-    #             else : 
-    #                 dst_file_name = dst_file.lstrip('v_')
-                
-    #             try :
-    #                 dst_file_name = f'{file_path}/{dst_file_name}_{file_ctime}{file_ext}'
-    #                 os.rename(self.src_file,dst_file_name)
-    #                 self.noCheck_files()
-    #             except FileExistsError :
-    #                 print(f'{dst_file_name} is exited')
-    #         except FileNotFoundError :
-    #             print(f'{self.src_file} is not found')
-
     
-
-    # def all_files(self):
-    #     self.listbox['listvariable'] = Variable(value=self.get_file())
-
-    # def noCheck_files(self):
-    #     noChk_file_list = [file for file in self.get_file() if os.path.basename(file)[0] != 'v']
-    #     self.listbox['listvariable'] = Variable(value=noChk_file_list)
-
-    # def checked_files(self):
-    #     noChk_file_list = [file for file in self.get_file() if os.path.basename(file)[0] == 'v']
-    #     self.listbox['listvariable'] = Variable(value=noChk_file_list)
-
-    # def convert_filename(self):
-    #     self.FAX_rename( self.company_name.get(), self.chk_active.get())
-
-    # def handle_watchdog_event(self, event):
-    #     """Called when watchdog posts an event"""
-    #     watchdog_event = self.queue.get()
-    #     print("event type:", watchdog_event)
-
-    # def shutdown(self, event):
-    #     print("""Perform safe shutdown when GUI has been destroyed""")
-    #     self.observer.stop()
-    #     self.observer.join()
-
-    # def notify(self, event):
-    #     """Forward events from watchdog to GUI"""
-    #     self.queue.put(event)
-    #     self.handle_watchdog_event(event)
+        
+            

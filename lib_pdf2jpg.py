@@ -22,10 +22,7 @@ class P2J():
     def send_to_clipboard(self,index):
         
         selected_file = self.converted_jpg_filelist[index]
-        if selected_file is None:
-            print(f"There is no file")
-        else : 
-            # file_name = os.path.basename(selected_file)
+        if os.path.isfile(selected_file):
             image = Image.open(selected_file)
             output = BytesIO()
             image.convert("RGB").save(output, "BMP")
@@ -35,6 +32,9 @@ class P2J():
             win32clipboard.EmptyClipboard()
             win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
             win32clipboard.CloseClipboard()    
+            
+        else : 
+            print(f"There is no file")
             
 
     def __most_recent_pdf( self):
