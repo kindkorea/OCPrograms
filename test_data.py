@@ -1,67 +1,91 @@
+# The code for changing pages was derived from: http://stackoverflow.com/questions/7546050/switch-between-two-frames-in-tkinter
+# License: http://creativecommons.org/licenses/by-sa/3.0/	
 
-import math
+import tkinter as tk
 
-class MarginCalc():
-    def __init__(self,buy_cost):
-        self.data_list = ['매입가','공급가','마진율(%)','마진금','부가세','판매가']
-        self.calc_data = {
-            'buy_cost' : [ '매입가', 0],
-            'margin_rate' : [ '공급가', 0],
-            'price' : [ '마진율(%)', 0],
-            'price_tax' : [ '마진금', 0],
-            'price_wtax' : [ '부가세', 0],
-            'margin' : [ '판매가', 0]
-        }
+
+LARGE_FONT= ("Verdana", 12)
+
+
+class SeaofBTCapp(tk.Tk):
+
+    def __init__(self, *args, **kwargs):
         
+        tk.Tk.__init__(self, *args, **kwargs)
+        container = tk.Frame(self)
+
+        container.pack(side="top", fill="both", expand = True)
+
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+
+        for F in (StartPage, PageOne, PageTwo):
+
+            frame = F(container, self)
+
+            self.frames[F] = frame
+
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(StartPage)
+
+    def show_frame(self, cont):
+
+        frame = self.frames[cont]
+        print(self.frames)
+        frame.tkraise()
+
         
-        
-        
-    def reset(self):
-        for ix in self.calc_data.values():
-            print(ix)
-        
-    
-    def calc_by_margin_rate(self,margin_rate):
-        self.reset()
-        self.margin_rate = margin_rate
-        self.price = round(self.buy_cost / (1-(margin_rate/100)))
-        self.price_tax = round(self.price * 0.1)
-        self.price_wtax = self.price + self.price_tax
-        self.margin = self.price - self.buy_cost
-        
-    def calc_by_margin(self,margin):
-        self.reset()
-        self.margin = margin
-        self.price = round(self.buy_cost + self.margin)
-        self.margin_rate = round((self.margin / self.price) * 100)
-        self.price_tax = round(self.price * 0.1)
-        self.price_wtax = self.price + self.price_tax
-        
-        
-    def calc_by_price(self,price):
-        self.reset()
-        self.price = price
-        self.margin =  self.price  - self.buy_cost
-        self.margin_rate = round((self.margin / self.price) * 100)
-        self.price_tax = round(self.price * 0.1)
-        self.price_wtax = self.price + self.price_tax
-        
-    def marginCalc_print(self):
-        print(f'{self.buy_cost=}')
-        print(f'{self.margin_rate=}')
-        print(f'{self.price=}')
-        print(f'{self.price_tax=}')
-        print(f'{self.price_wtax=}')
-        print(f'{self.margin=}')
-        print('')
+class StartPage(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self,parent)
+        label = tk.Label(self, text="Start Page", font=LARGE_FONT)
+        label.pack(pady=10,padx=10)
+
+        button = tk.Button(self, text="Visit Page 1",
+                            command=lambda: controller.show_frame(PageOne))
+        button.pack()
+
+        button2 = tk.Button(self, text="Visit Page 2",
+                            command=lambda: controller.show_frame(PageTwo))
+        button2.pack()
+
+
+class PageOne(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Page One!!!", font=LARGE_FONT)
+        label.pack(pady=10,padx=10)
+
+        button1 = tk.Button(self, text="Back to Home",
+                            command=lambda: controller.show_frame(StartPage))
+        button1.pack()
+
+        button2 = tk.Button(self, text="Page Two",
+                            command=lambda: controller.show_frame(PageTwo))
+        button2.pack()
+
+
+class PageTwo(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Page Two!!!", font=LARGE_FONT)
+        label.pack(pady=10,padx=10)
+
+        button1 = tk.Button(self, text="Back to Home",
+                            command=lambda: controller.show_frame(StartPage))
+        button1.pack()
+
+        button2 = tk.Button(self, text="Page One",
+                            command=lambda: controller.show_frame(PageOne))
+        button2.pack()
         
 
-app = MarginCalc(10000)
-app.calc_by_margin_rate(20)
-app.marginCalc_print()
 
-app.calc_by_margin(2500)
-app.marginCalc_print()
-
-app.calc_by_price(12500)
-app.marginCalc_print()
+app = SeaofBTCapp()
+app.mainloop()

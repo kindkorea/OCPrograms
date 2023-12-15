@@ -20,9 +20,10 @@ class CustomHandler(FileSystemEventHandler):
     def on_moved(self, event): self.app.notify(event)
 
 class GUI_FaxReceive(Frame):
-    def __init__(self, container):
+    def __init__(self, container, row, col):
         super().__init__(container )
         
+        self.grid(row=row, column=col , pady=20)
         # self.file_listbox
         self.__create_widgets()
         

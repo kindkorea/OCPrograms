@@ -6,8 +6,10 @@ import math
 
 
 class Calculator(Frame):
-    def __init__(self, container):
+    def __init__(self, container, row, col):
         super().__init__(container)
+        
+        # self.grid(column=col,row=row)
         
         self.data_entry_list = {
             'buy_cost' : ['매입가'],

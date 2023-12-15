@@ -10,11 +10,13 @@ from io import BytesIO
 
 
 class Pdf2jpg(Frame):
-    def __init__(self, container, count_cb):
+    def __init__(self, container, row, col, count_cb):
         super().__init__(container)
         # setup the grid layout manager
         self.columnconfigure(0, weight=1)
         self.columnconfigure(0, weight=3)
+        # self.grid(column=col, row=row, pady = 20)
+        
         self.cb_btns =count_cb
         self.cb_btn_list = []
         
@@ -25,6 +27,8 @@ class Pdf2jpg(Frame):
         self.title_first  = StringVar()
         
         self.__create_widgets()
+        
+        
         
     def __create_widgets(self):
         # Find what
