@@ -60,7 +60,7 @@ class FaxReceive():
             os.rename(self.selectedfile, dst_file_name)
                     
         else :
-            print(f'Rename_file error : {src_file} is not found')
+            print(f'Rename_file error : {dst_name} is not found')
     
     def Checking_file(self):
         if os.path.isfile(self.selectedfile):
