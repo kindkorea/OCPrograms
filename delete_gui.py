@@ -26,11 +26,9 @@ class App(tk.Tk):
 
     def __create_widgets(self):
         # create the input frame
-        gui_pdf2jpg.Pdf2jpg(self, 0, 0, 8)
-        
-        gui_faxReceive.GUI_FaxReceive(self, 1, 0 )
-        
-        gui_calculator.Calculator(self, 2, 0)
+        gui_pdf2jpg.Pdf2jpg(self).pack()
+        gui_faxReceive.GUI_FaxReceive(self).pack()
+        gui_calculator.Calculator(self).pack()
         
 
 if __name__ == "__main__":

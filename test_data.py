@@ -1,91 +1,66 @@
-# The code for changing pages was derived from: http://stackoverflow.com/questions/7546050/switch-between-two-frames-in-tkinter
-# License: http://creativecommons.org/licenses/by-sa/3.0/	
-
 import tkinter as tk
+from tkinter import ttk
+from tkinter import * # __all__
+import math
+import directory_name as company
+import os
 
 
-LARGE_FONT= ("Verdana", 12)
-
-
-class SeaofBTCapp(tk.Tk):
-
-    def __init__(self, *args, **kwargs):
+class Calculator(Frame):
+    def __init__(self, container):
+        super().__init__(container)
         
-        tk.Tk.__init__(self, *args, **kwargs)
-        container = tk.Frame(self)
-
-        container.pack(side="top", fill="both", expand = True)
-
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-
-        self.frames = {}
-
-        for F in (StartPage, PageOne, PageTwo):
-
-            frame = F(container, self)
-
-            self.frames[F] = frame
-
-            frame.grid(row=0, column=0, sticky="nsew")
-
-        self.show_frame(StartPage)
-
-    def show_frame(self, cont):
-
-        frame = self.frames[cont]
-        print(self.frames)
-        frame.tkraise()
+        
+        combo = ttk.Combobox(
+        state="readonly",
+        values=["Python", "C", "C++", "Java"]
+        )
+        combo.place(x=50, y=50)
+        # button = ttk.Button(text="Display selection", command=display_selection)
+        # button.place(x=50, y=100)
 
         
-class StartPage(tk.Frame):
-
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="Start Page", font=LARGE_FONT)
-        label.pack(pady=10,padx=10)
-
-        button = tk.Button(self, text="Visit Page 1",
-                            command=lambda: controller.show_frame(PageOne))
-        button.pack()
-
-        button2 = tk.Button(self, text="Visit Page 2",
-                            command=lambda: controller.show_frame(PageTwo))
-        button2.pack()
+        for key in company.forder_list.keys(): 
+            f = company.PATH + company.forder_list[key][1]
+            print(f'{key} : {os.path.isdir(f)}')
 
 
-class PageOne(tk.Frame):
-
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Page One!!!", font=LARGE_FONT)
-        label.pack(pady=10,padx=10)
-
-        button1 = tk.Button(self, text="Back to Home",
-                            command=lambda: controller.show_frame(StartPage))
-        button1.pack()
-
-        button2 = tk.Button(self, text="Page Two",
-                            command=lambda: controller.show_frame(PageTwo))
-        button2.pack()
+    # def display_selection():
+    #     # Get the selected value.
+    #     selection = combo.get()
+    #     messagebox.showinfo(
+    #         message=f"The selected value is: {selection}",
+    #         title="Selection"
+    #     )    
 
 
-class PageTwo(tk.Frame):
+class App(Tk):
+    def __init__(self):
+        super().__init__()
+        self.title('Replace')
+        self.geometry('500x500+2000+100')
+        # self.resizable(0, 0)
+        # windows only (remove the minimize/maximize button)
+        # self.attributes('-toolwindow', True)
 
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Page Two!!!", font=LARGE_FONT)
-        label.pack(pady=10,padx=10)
+        # layout on the root window
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
 
-        button1 = tk.Button(self, text="Back to Home",
-                            command=lambda: controller.show_frame(StartPage))
-        button1.pack()
+        self.__create_widgets()
 
-        button2 = tk.Button(self, text="Page One",
-                            command=lambda: controller.show_frame(PageOne))
-        button2.pack()
+    def __create_widgets(self):
+        # create the input frame
+        # input_frame = gui_pdf2jpg.Pdf2jpg(self,8)
+        # input_frame.grid(column=0, row=0)
+        fax_receive = Calculator(self)
+        fax_receive.grid(column=0, row=1)
+        # # create the button frame
+        # button_frame = gui_pdf2jpg.Cb_Btn_frame(self,8)
+
         
-
-
-app = SeaofBTCapp()
-app.mainloop()
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()        
+    
+    

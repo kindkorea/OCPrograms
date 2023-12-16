@@ -20,10 +20,10 @@ class CustomHandler(FileSystemEventHandler):
     def on_moved(self, event): self.app.notify(event)
 
 class GUI_FaxReceive(Frame):
-    def __init__(self, container, row, col):
-        super().__init__(container )
-        
-        self.grid(row=row, column=col , pady=20)
+    def __init__(self, container):
+        super().__init__(container)
+        self.container = self
+        # self.grid(row=row, column=col , pady=20)
         # self.file_listbox
         self.__create_widgets()
         
@@ -33,10 +33,10 @@ class GUI_FaxReceive(Frame):
         
         self.FAX_R = lib_faxReceive.FaxReceive(self.FAX_DIRECTOR_PATH)
 
-        self.file_listbox = Listbox(self, width=50,  selectmode=SINGLE, highlightthickness=1) 
+        self.file_listbox = Listbox(self.container, width=50,  selectmode=SINGLE, highlightthickness=1) 
         self.file_listbox.grid(row=0,column=0) 
         
-        self.scrollbar=Scrollbar(self, orient='vertical' ,command=self.file_listbox.yview)
+        self.scrollbar=Scrollbar(self.container, orient='vertical' ,command=self.file_listbox.yview)
         self.scrollbar.grid(row=0, sticky='nse')
         
         self.file_listbox.config(yscrollcommand = self.scrollbar.set)
@@ -45,7 +45,7 @@ class GUI_FaxReceive(Frame):
         self.file_listbox.bind("<Double-Button-1>",self.__handler_double_button1)
         self.file_listbox.bind("<<ListboxSelect>>",self.__handler_ListboxSelect)
         
-        self.btn_frame = Frame(self)
+        self.btn_frame = Frame(self.container)
         self.refile_name = Entry(self.btn_frame,width=15)
         self.refile_name.grid(row=0 ,column=0, padx=10 )
         Button(self.btn_frame,width=10, text="RE:name" , command=self.__func_rename).grid(row=0 ,column=2) 

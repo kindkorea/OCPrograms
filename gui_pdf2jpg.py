@@ -10,14 +10,15 @@ from io import BytesIO
 
 
 class Pdf2jpg(Frame):
-    def __init__(self, container, row, col, count_cb):
+    def __init__(self, container):
         super().__init__(container)
         # setup the grid layout manager
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(0, weight=3)
-        # self.grid(column=col, row=row, pady = 20)
         
-        self.cb_btns =count_cb
+        self.container = self
+        # self.columnconfigure(0, weight=1)
+        # self.columnconfigure(0, weight=3)
+        
+        self.cb_btns = 8
         self.cb_btn_list = []
         
         PDF_SRC_DIR_PATH = 'C:/Users/kindk/Downloads'
@@ -33,23 +34,26 @@ class Pdf2jpg(Frame):
     def __create_widgets(self):
         # Find what
 
-
+        self.top_frame = Frame(self.container)
+        self.top_frame.grid(row=0,column=0 , padx=5)
         self.title_first = f'웅천목재_{datetime.datetime.now().month}월_청구서'
-        self.entry_name_first = Entry(self, width=15 , textvariable=self.title_first )
+        self.entry_name_first = Entry(self.top_frame, width=15 , textvariable=self.title_first )
         self.entry_name_first.focus()
-        self.entry_name_first.grid(column=0, row=0, columnspan=2,sticky=tk.W )
+        self.entry_name_first.grid(column=0, row=0, padx= 5, sticky=tk.W )
         self.entry_name_first.insert(END,self.title_first)
         # self.entry_name_first.bind('<Return>',self.__btn_pdf2jpg)
 
-        self.entry_name_second =Entry(self, width=15)
-        self.entry_name_second.grid(column=2, row=0,columnspan=2, sticky=tk.W)
+        self.entry_name_second =Entry(self.top_frame, width=15)
+        self.entry_name_second.grid(column=2, row=0, padx= 5, sticky=tk.W)
   
         
-        Button(self, text='PDF to JPG', command=self.__btn_pdf2jpg).grid(column=4, row=0, columnspan=2,sticky=tk.E )
-        Button(self, text='Re:name', command=self.__btn_rename).grid(column=6, row=0, columnspan=2,sticky=tk.E)
-  
+        Button(self.top_frame, text='PDF to JPG', command=self.__btn_pdf2jpg).grid(column=4, row=0, padx= 5,sticky=tk.E )
+        Button(self.top_frame, text='Re:name', command=self.__btn_rename).grid(column=6, row=0, padx= 5,sticky=tk.E)
+        
+        self.btn_f = Frame(self.container)
+        self.btn_f.grid(row=1,column=0)
         for i in range(self.cb_btns):
-            self.cb_btn_list.append(self.__make_btn(self, 1, i , 6, f'CB_{i+1}'))
+            self.cb_btn_list.append(self.__make_btn(self.btn_f, 1, i , 5, f'CB_{i+1}'))
 
         for widget in self.winfo_children():
             widget.grid(padx=1, pady=3)
@@ -64,7 +68,7 @@ class Pdf2jpg(Frame):
     def __make_btn(self,frame, row, column, width, text):
         e = Button(frame, width=width , text = text , command= lambda : self.__btn_cell_data(column))
         e.coords = (row-1, column-1)
-        e.grid(row=row, column=column)
+        e.grid(row=row, column=column , padx=1)
         return e
     
     def __btn_cell_data(self,index):
@@ -122,7 +126,7 @@ class App(Tk):
         # create the input frame
         # input_frame = gui_pdf2jpg.Pdf2jpg(self,8)
         # input_frame.grid(column=0, row=0)
-        fax_receive = Pdf2jpg(self,8)
+        fax_receive = Pdf2jpg(self)
         fax_receive.grid(column=0, row=1)
         # # create the button frame
         # button_frame = gui_pdf2jpg.Cb_Btn_frame(self,8)
