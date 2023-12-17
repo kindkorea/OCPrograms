@@ -28,8 +28,8 @@ class GUI_FaxReceive(Frame):
         self.__create_widgets()
         
     def __create_widgets(self):
-        self.FAX_DIRECTOR_PATH = 'C:/Users/kindk/OneDrive/OCWOOD_OFFICE/FAX_received/'
-        # self.FAX_DIRECTOR_PATH = 'C:/Users/kindk/.vscode/test/'
+        # self.FAX_DIRECTOR_PATH = 'C:/Users/kindk/OneDrive/OCWOOD_OFFICE/FAX_received/'
+        self.FAX_DIRECTOR_PATH = './fax_receive/'
         
         self.FAX_R = lib_faxReceive.FaxReceive(self.FAX_DIRECTOR_PATH)
 

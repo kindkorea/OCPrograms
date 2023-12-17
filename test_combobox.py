@@ -1,60 +1,49 @@
-#!/usr/bin/env python3
 
-import tkinter as tk
+from tkinter import Tk, Listbox, Entry, StringVar, END, mainloop
 
-def on_change(*args):
-    #print(args)
-          
-    value = var_text.get()
-    value = value.strip().lower()
+import directory_name
 
-    # get data from test_list
-    if value == '':
-        data = test_list
-    else:
-        data = []
-        for item in test_list:
-            if value in item.lower():
-                data.append(item)                
-
-    # update data in listbox
-    listbox_update(data)
-
-
-def listbox_update(data):
-    # delete previous data
-    listbox.delete(0, 'end')
-
-    # sorting data 
-    data = sorted(data, key=str.lower)
-
-    # put new data
-    for item in data:
-        listbox.insert('end', item)
-
-
-def on_select(event):
-    # display element selected on list
-    print('(event) previous:', event.widget.get('active'))
-    print('(event)  current:', event.widget.get(event.widget.curselection()))
-    print('---')
-
-# --- main ---
-
-test_list = ('apple', 'banana', 'Cranberry', 'dogwood', 'alpha', 'Acorn', 'Anise', 'Strawberry' )
-
-root = tk.Tk()
-
-var_text = tk.StringVar()
-var_text.trace('w', on_change)
-
-entry = tk.Entry(root, textvariable=var_text)
-entry.pack()
-
-listbox = tk.Listbox(root)
+def handler_key(e):
+    key = e.keycode
+    print(key)
+    
+    if key == 40 or key == 38 : # arrow up down
+        listbox.focus()
+    elif key == 13 or key == 32 : # enter and space
+        cb_search()
+    
+    
+def cb_search():
+    sstr = search_str.get()
+    listbox.delete(0, END)
+    # If filter removed show all data
+    if sstr == "":
+        fill_listbox(main_data) 
+        return
+  
+    filtered_data = list()
+    for item in main_data:
+        if item.find(sstr) >= 0:
+            filtered_data.append(item)
+   
+    fill_listbox(filtered_data)   
+  
+def fill_listbox(ld):
+    for item in ld:
+        listbox.insert(END, item)
+  
+  
+main_data = directory_name.forder_list.keys()
+  
+# GUI
+master = Tk()
+listbox = Listbox(master,selectmode = 'single')
 listbox.pack()
-#listbox.bind('<Double-Button-1>', on_select)
-listbox.bind('<<ListboxSelect>>', on_select)
-listbox_update(test_list)
-
-root.mainloop()
+fill_listbox(main_data)
+  
+search_str = StringVar()
+search = Entry(master, textvariable=search_str, width=10 )
+search.pack()
+search.bind('<Key>', handler_key)
+  
+mainloop()
