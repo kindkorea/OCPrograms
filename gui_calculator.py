@@ -1,15 +1,17 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import * # __all__
-import math
+import lib_calc_method as mcal
+from tkinter import messagebox 
 
-
-
-class Calculator(Frame):
-    def __init__(self, container):
-        super().__init__(container)
+class Calculator(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
         
-        # self.grid(column=col,row=row)
+        self.mcal = mcal.MarginCalc()
+        
+        self.type_on = True
+        self.master = master
+        # self.grid()
         
         self.data_entry_list = {
             'buy_cost' : ['매입가'],
@@ -19,201 +21,108 @@ class Calculator(Frame):
             'price_wtax' : ['판매/tax'],
             'margin' : ['마진금'],
         }
+        self.create_widgets()
+    def create_widgets(self):
+        # 엔트리 위젯을 담을 2차원 리스트 생성
+        self.entry_widgets = []
+        # self.labels = ["Label"] + [f"Column {i}" for i in range(2, 7)]  # 열의 라벨
         
+        for ix, title in enumerate(self.data_entry_list.values()):
+            # label_text = self.labels[j]
+            label = ttk.Label(self, text=title)
+            label.grid(row=0, column=ix+1)
+        # 추가 버튼 생성
+        add_button = ttk.Button(self, text="Add Row", command=self.create_row)
+        add_button.grid(row=0, column=0)
+        self.create_row()  # 초기에 한 행 생성
         
-        self.CELL_WIDTH = 10
-        self.ENTER_ON = True
-        self.buy_cost = 0
-        self.margin_rate = 0
-        self.price = 0
-        self.price_tax = 0
-        self.price_wtax = 0
-        self.margin = 0
-        self.taxCheckVar = IntVar()
-        
-        
-        self.__create_widgets()
-        
-    def __create_widgets(self):
-        
-        # for ix in range(len(self.data_list)):
-        #     self.__make_entry(0,ix,self.data_list[ix],FALSE)
-       
-        checkbutton1= Button(self, text='Change', command=self.__handler_without_tax)
-        checkbutton1.grid(row=0,column=0,rowspan=2, sticky='sn')
-        
-        for ix, name in enumerate(self.data_entry_list.values()):
-            self.__make_entry(0,ix+1,self.CELL_WIDTH,name[0],FALSE)
-        
-        
-        for ix, key in enumerate(self.data_entry_list.keys()):
-            self.data_entry_list[key].append( self.__make_entry(1, ix+1, self.CELL_WIDTH,'',TRUE))
-        
-        print(self.data_entry_list)
-        # self.input_entry_list.reverse()
-
-
-    def __make_entry(self, row, column,width, text, state):
-        e = Entry(self, width=width)
-        if text: e.insert(0, text)
-        e['state'] = NORMAL if state else DISABLED
-        e['justify'] = 'right' if state else 'center'
-        e.coords = (row-1, column-1)
-        # e.bind('<Return>', lambda  column : self.__handler_entry_enter(column))
-        e.bind('<Return>', self.__handler_entry_enter)
-        e.bind('<Key>', self.__handler_enter_key)
-        e.grid(row=row, column=column)
-        return e
-
-    def __get_widget_key(self, widget):
-        for  k in self.data_entry_list.keys():
-            if self.data_entry_list[k][1] == widget:
-                return k
-    
-    def __handler_without_tax(self):
-        # if self.taxCheckVar.get() == TRUE:
-        self.buy_cost = self.__remove_separator(self.data_entry_list['buy_cost'][1].get())
-        
-        if self.buy_cost != None :
-            self.buy_cost  = round(self.buy_cost / 1.1)
-            self.data_entry_list['buy_cost'][1].delete(0,END)
-            self.data_entry_list['buy_cost'][1].insert(0,self.buy_cost)
-        
-    def __handler_enter_key(self,e):
-        if self.ENTER_ON and e.keycode != 9:
-            w_key = self.__get_widget_key(e.widget)    
-            print(f'__handler_enter_key : {w_key=}')
-            self.data_entry_list[w_key][1].delete(0,END)
-            self.ENTER_ON = False
-        
-    def __handler_entry_enter(self,e):
-        '''intitialize data'''
-        self.ENTER_ON = True
-        self.buy_cost = self.__remove_separator(self.data_entry_list['buy_cost'][1].get())
-        
-        self.margin_rate = 0
-        self.price = 0
-        self.price_tax = 0
-        self.price_wtax = 0
-        self.margin = 0
-        
-        w_key = self.__get_widget_key(e.widget)
-        entry_data = int(e.widget.get())
-        print(type(entry_data))
-        
-        if w_key == 'price' :
-            self.__calc_by_price(entry_data)
-        elif w_key == 'margin_rate' :
-            self.__calc_by_margin_rate(entry_data)
-        elif w_key == 'margin' :
-            self.__calc_by_margin(entry_data)
-        elif w_key == 'price_wtax' :
-            self.__calc_by_price_wtax(entry_data)
-        
-        self.marginCalc_print()
-        
-        
-    
-    
-    
-    def __calc_by_price_wtax(self, price_wtax):
-        print(f'__calc_by_margin_rate{price_wtax=}')
-        self.price_wtax = price_wtax
-        self.price_tax = round(self.price_wtax / 11)
-        self.price = self.price_wtax - self.price_tax
-        self.margin = self.price - self.buy_cost
-        self.margin_rate = round((self.margin / self.price) * 100)
+    def create_row(self):
+        row_entries = []
+        row_number = len(self.entry_widgets)
+        # 엔트리 생성 및 라벨 추가
+        for j in range(1, 7):
+            entry = ttk.Entry(self,width=10, justify='right')
+            entry.grid(row=len(self.entry_widgets) + 1, column=j )
             
-    def __calc_by_margin_rate(self,margin_rate):
-        print(f'__calc_by_margin_rate{margin_rate=}')
-        self.margin_rate = margin_rate
-        self.price = round(self.buy_cost / (1-(margin_rate/100)))
-        self.price_tax = round(self.price * 0.1)
-        self.price_wtax = self.price + self.price_tax
-        self.margin = self.price - self.buy_cost
-        
-        
-        
-    def __calc_by_margin(self,margin):
-        print(f'__calc_by_margin {margin=}')
-        self.margin = margin
-        self.price = round(self.buy_cost + self.margin)
-        self.margin_rate = round((self.margin / self.price) * 100)
-        self.price_tax = round(self.price * 0.1)
-        self.price_wtax = self.price + self.price_tax
-        
-        
-    def __calc_by_price(self,price):
-        print(f'__calc_by_price {price=}')
-        self.price = price
-        self.margin =  self.price  - self.buy_cost
-        self.margin_rate = round((self.margin / self.price) * 100)
-        self.price_tax = round(self.price * 0.1)
-        self.price_wtax = self.price + self.price_tax
+            entry.bind('<Return>', lambda event , row =row_number, col = j : self._handler_entry_enter(event, row, col))
+            entry.bind('<Key>', lambda event, row= row_number, col = j :  self._handler_key_press(event,row,col ))
+            row_entries.append(entry)
+            
+        self.entry_widgets.append(row_entries)
 
-    def __set_separator(self,val):
+        # 각 행의 버튼 설정
+        button = ttk.Button(self, text=f"VAT {len(self.entry_widgets)}", command=lambda row=len(self.entry_widgets)-1: self.print_values(row))
+        button.grid(row=len(self.entry_widgets), column=0)
+
+    def print_values(self, row):
+        # values = [int(entry.get()) for entry in self.entry_widgets[row][1:]]  # 첫 번째 라벨은 제외
+        # print(f"Values in Row {row+1}: {values}")
+        val  = self.entry_widgets[row][0].get()
+        val = int(self._remove_separator(val)) if val else messagebox.showwarning("Warning", "Required input Buy_cost")
+        val = round(val/1.1)
+        self.entry_widgets[row][0].delete(0,tk.END)
+        self.entry_widgets[row][0].insert(0,self._set_separator(val))
+        
+    
+    def _set_separator(self,val):
         return '{:,d}'.format(val)
     
-    def __remove_separator(self,val):
-        if val != '':
-            return int(val.replace(',',''))
+    def _remove_separator(self,val):
+        if val :
+            val = val.replace(',','')
+            if val.isdigit():
+                return val
+            return False
+        else :
+            return False
             
+    def _handler_key_press(self,event,row,col):
             
+        if not self.type_on and event.char.isdigit():
+            event.widget.delete(0,tk.END)
+            self.type_on = True
+
             
-    def marginCalc_print(self):
-        for e in self.data_entry_list.values():
-            e[1].delete(0,END)
+    def _handler_entry_enter(self,e, row, col):
+        '''intitialize data'''
         
-        self.data_entry_list['buy_cost'][1].insert(0,self.__set_separator(self.buy_cost))
-        self.data_entry_list['margin_rate'][1].insert(0,self.__set_separator(self.margin_rate))
-        self.data_entry_list['price'][1].insert(0,self.__set_separator(self.price))
-        self.data_entry_list['price_tax'][1].insert(0,self.__set_separator(self.price_tax))
-        self.data_entry_list['price_wtax'][1].insert(0,self.__set_separator(self.price_wtax))
-        self.data_entry_list['margin'][1].insert(0,self.__set_separator(self.margin))
+        values = {}
+        for i, e in enumerate(self.entry_widgets[row]):
+            val = self._remove_separator(e.get())
+            val = int(val) if val else 0
+            
+            if i == 0 and val == 0 :
+                messagebox.showwarning("Warning", "Required input Buy_cost")
+                return
+            if i == 1 and int(val) > 99:
+                messagebox.showwarning("Warning",'Please maintain a margin rate below 99%  ')
+                return 
+            values[i] = 0 if val == '' else int(val)
+         
+        self.mcal.priceList = values 
         
+        if col == 2 : # calculate by margin rate
+            self.mcal.calc_by_margin_rate()
+        elif col == 3 : # calculate by price
+            self.mcal.calc_by_price()
+        elif col == 5 : # calculate by price with tax
+            self.mcal.calc_by_price_wtax()
+        elif col == 6: # calculate by margin
+            self.mcal.calc_by_margin()
         
-        print(f'{self.buy_cost=}')
-        print(f'{self.margin_rate=}')
-        print(f'{self.price=}')
-        print(f'{self.price_tax=}')
-        print(f'{self.price_wtax=}')
-        print(f'{self.margin=}')
-        # for entry in self.input_entry_list:
-        #     entry.delete(0,END)
+        for i, e in enumerate(self.entry_widgets[row]):
+            e.delete(0,tk.END)
+            e.insert(0,self._set_separator(self.mcal.priceList[i]))    
+            
+        self.type_on = False
         
-        # self.input_entry_list[0].insert(0,self.buy_cost)
-        # self.input_entry_list[1].insert(0,self.price)
-        # self.input_entry_list[2].insert(0,self.margin_rate)
-        # self.input_entry_list[3].insert(0,self.margin)
-        # self.input_entry_list[4].insert(0,self.price_tax)
-        # self.input_entry_list[5].insert(0,self.price_wtax)
-        
-        
-class App(Tk):
-    def __init__(self):
-        super().__init__()
-        self.title('Replace')
-        self.geometry('500x500+2000+100')
-        # self.resizable(0, 0)
-        # windows only (remove the minimize/maximize button)
-        # self.attributes('-toolwindow', True)
+class MainApplication(tk.Tk):
+    def __init__(self,container):
+        super().__init__(container)
 
-        # layout on the root window
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
+        self.a_frame = A(self)
+        self.a_frame.grid(row=0, column=0, sticky="nsew")
 
-        self.__create_widgets()
-
-    def __create_widgets(self):
-        # create the input frame
-        # input_frame = gui_pdf2jpg.Pdf2jpg(self,8)
-        # input_frame.grid(column=0, row=0)
-        fax_receive = Calculator(self)
-        fax_receive.grid(column=0, row=1)
-        # # create the button frame
-        # button_frame = gui_pdf2jpg.Cb_Btn_frame(self,8)
-
-        
 if __name__ == "__main__":
-    app = App()
-    app.mainloop()        
+    app = MainApplication()
+    app.mainloop()

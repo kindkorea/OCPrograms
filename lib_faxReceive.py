@@ -10,10 +10,21 @@ class FaxReceive():
         
         # self.DIRECTOR_PATH = dir_path
         self.__selected_file =''
+        
+        self.fax_files = []
         # self.src_path = self.DIRECTOR_PATH
         self.EXTENTION_VIEWER = 'c:/Users/kindk/AppData/Local/Imagine/Imagine64.exe'
         # self.FAX_DIRECTOR_PATH = 'C:/Users/kindk/OneDrive/OCWOOD_OFFICE/FAX_received/'
         self.FAX_DIRECTOR_PATH = fax_path 
+    
+    @property
+    def faxFiles(self):
+        return self.fax_files
+    
+    @faxFiles.setter
+    def faxFiles(self, faxFileList):
+        self.fax_files = faxFileList
+    
         
     @property
     def selectitem(self):
@@ -30,7 +41,8 @@ class FaxReceive():
 
         
     def __get_directory_file(self):
-        return  glob.glob(self.FAX_DIRECTOR_PATH +'/*.*')
+        self.faxFiles = glob.glob(self.FAX_DIRECTOR_PATH +'/*.*')
+        return  
         # return  [file for file in load_files if file.endswith('.jpg')]
     
     def __get_sorted_faxfiles(self,file_list):
@@ -89,7 +101,7 @@ class FaxReceive():
         
     def Run_with_viewer(self):
         cmd = f'{self.EXTENTION_VIEWER} {self.selectedfile}'
-        print(f'__run_with_viewer = {cmd}')
+        # print(f'__run_with_viewer = {cmd}')
         subprocess.Popen(cmd)
         
     
