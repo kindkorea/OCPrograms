@@ -48,31 +48,35 @@ CompanyList = {
     '홍진테크':    '홍진테크_흡음재',
 }
 
-class CompanyListWidget(Frame):
-    def __init__(self,container, name_list, eventHandler):
-        super().__init__(container)
+class CompanyListWidget:
+    def __init__(self, master, handler):
         
-        self.main_data  = name_list
-        # self.src_path = src_path
-        # self.dst_path = dst_path
+        self.main_data  =  CompanyList.keys()
+        self.select_handler = handler
         
-        self.select_handler = eventHandler
         
+        self.master = master
+        self.master_position_X = self.master.winfo_rootx()
+        self.master_position_Y = self.master.winfo_rooty()
+        
+        
+        self.popup_window = Toplevel(master)
+        self.popup_window.title("Popup Window")
+        self.popup_window.geometry(f'200x300+{self.master_position_X}+{self.master_position_Y+100}')
         self.selected_item = StringVar()
-        
         self.search_str = StringVar()
         
-        self.search = Entry(self, textvariable=self.search_str )
+        self.search = Entry(self.popup_window, textvariable=self.search_str )
         self.search.grid(row=0,column=0,pady=10)
         self.search.bind('<Key>', self.handler_key)
         
      
-        self.listbox = Listbox(self, selectmode = 'single')
+        self.listbox = Listbox(self.popup_window, selectmode = 'single')
         self.listbox.bind('<<ListboxSelect>>', self.__handlerList)
-        self.listbox.bind('<Double-Button-1>', self.__handler_listbox_double_click)
+        self.listbox.bind('<Double-Button-1>', self.__handlerList)
         self.listbox.grid(row=1,column=0)
         
-        self.scrollbar=Scrollbar(self, orient='vertical' ,command=self.listbox.yview)
+        self.scrollbar=Scrollbar(self.popup_window, orient='vertical' ,command=self.listbox.yview)
         self.scrollbar.grid(row=1, sticky='nse')
         
         self.listbox.config(yscrollcommand = self.scrollbar.set)
@@ -80,32 +84,17 @@ class CompanyListWidget(Frame):
         
         
         self.fill_listbox(self.main_data)
-        
-    @property
-    def getName(self):
-        return self.selected_item 
-    
-    @getName.setter
-    def getName(self):
-        pass
-        
+
     def __handlerList(self, e):
-        
-        # print('handlerList in  CompanyListWidget class')
-        selected_tuple = self.listbox.curselection()
-        if not selected_tuple:
-            return 
-        index =  selected_tuple[0]
-        # print(f'__selected_src_file={index=}')
-        if index is not None: # if the tuple is not empty
-            self.search.delete(0,END)
-            self.search.insert(0,self.listbox.get(index))
-            self.select_handler(self.selected_item)
-            self.selected_item = self.search.get()
+        selected_index = self.listbox.curselection()
+        if selected_index:
+            selected_value = self.listbox.get(selected_index)
+            self.select_handler(selected_value)
+            self.popup_window.destroy()
             
-            # self.select_handler(self.search.get())
-    def __handler_listbox_double_click(self, e):
-        self.select_handler(self.selected_item)
+            
+    # def __handler_listbox_double_click(self, e):
+    #     self.select_handler(self.selected_item)
     
     def handler_key(self,e):
         key = e.keycode

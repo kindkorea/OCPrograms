@@ -34,21 +34,22 @@ class Pdf2jpg(Frame):
     def __create_widgets(self):
         # Find what
 
-        self.top_frame = Frame(self.container)
-        self.top_frame.grid(row=0,column=0 , padx=5)
+        self.top_frame = LabelFrame(self.container,text='PDF파일을 이미지로 변환함 ')
+        self.top_frame.grid(row=0, column=0 , padx=10 ,sticky='we')
+        
+        
         self.title_first = f'웅천목재_{datetime.datetime.now().month}월_청구서'
-        self.entry_name_first = Entry(self.top_frame, width=15 , textvariable=self.title_first )
-        self.entry_name_first.focus()
-        self.entry_name_first.grid(column=0, row=0, padx= 5, sticky=tk.W )
+        self.entry_name_first = Entry(self.top_frame, width=20 , textvariable=self.title_first )
+        self.entry_name_first.grid(column=0, row=0, padx= 5, sticky='w' )
         self.entry_name_first.insert(END,self.title_first)
         # self.entry_name_first.bind('<Return>',self.__btn_pdf2jpg)
 
-        self.entry_name_second =Entry(self.top_frame, width=15)
-        self.entry_name_second.grid(column=2, row=0, padx= 5, sticky=tk.W)
+        self.entry_name_second =Entry(self.top_frame, width=20)
+        self.entry_name_second.grid(column=2, row=0, padx= 5, sticky='w')
   
         
-        Button(self.top_frame, text='PDF to JPG', command=self.__btn_pdf2jpg).grid(column=4, row=0, padx= 5,sticky=tk.E )
-        Button(self.top_frame, text='Re:name', command=self.__btn_rename).grid(column=6, row=0, padx= 5,sticky=tk.E)
+        Button(self.top_frame, text='그림 파일로변환', command=self.__btn_pdf2jpg).grid(column=4, row=0, padx= 5,sticky=tk.E )
+        Button(self.top_frame, text='PDF이름 변환', command=self.__btn_rename).grid(column=6, row=0, padx= 5,sticky=tk.E)
         
         self.btn_f = Frame(self.container)
         self.btn_f.grid(row=1,column=0)

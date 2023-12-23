@@ -6,104 +6,82 @@ import subprocess
 
 
 class FaxReceive():
-    def __init__(self, fax_path):
+    def __init__(self,file_path):
         
-        # self.DIRECTOR_PATH = dir_path
-        self.__selected_file =''
-        
-        self.fax_files = []
-        # self.src_path = self.DIRECTOR_PATH
         self.EXTENTION_VIEWER = 'c:/Users/kindk/AppData/Local/Imagine/Imagine64.exe'
-        # self.FAX_DIRECTOR_PATH = 'C:/Users/kindk/OneDrive/OCWOOD_OFFICE/FAX_received/'
-        self.FAX_DIRECTOR_PATH = fax_path 
+        self.FAX_DIRECTOR_PATH = file_path
     
-    @property
-    def faxFiles(self):
-        return self.fax_files
+    def get_faxfiles(self):
+        return self._get_sorted_faxfiles(self._get_files_inDirectory())     
     
-    @faxFiles.setter
-    def faxFiles(self, faxFileList):
-        self.fax_files = faxFileList
     
+    def rename_to_company(self, src_file ,dst_name):
         
-    @property
-    def selectitem(self):
-        return self.__selected_file
+        src_path_file = os.path.join(self.FAX_DIRECTOR_PATH,src_file)
+        if os.path.isfile(src_path_file):
+            try : 
+                file_ext = os.path.splitext(src_file)[1] 
+                file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(src_path_file)))
+                dst_file_name = os.path.join(self.FAX_DIRECTOR_PATH, f'{dst_name}_{file_ctime}{file_ext}')
+                os.rename(src_path_file, dst_file_name)
+                
+            except FileExistsError :
+                print(f'Error: The file {dst_file_name} exist.')
+        else :
+                print(f'Error: The file {src_path_file} does not exist.')
     
-    @selectitem.setter
-    def selectitem(self, file):
-        self.__selected_file = file
-
-    @property
-    def selectedfile(self):
-        return f'{self.FAX_DIRECTOR_PATH}{self.selectitem}'
+    def is_checked(self, src_file):
+        src_file_path = os.path.join(self.FAX_DIRECTOR_PATH,src_file) 
+        try : 
+            if src_file[1] == 'v':
+                d_name = src_file.split('[v]')[1]
+                dst_file_name = os.path.join(self.FAX_DIRECTOR_PATH,d_name) 
+            else :
+                dst_file_name = os.path.join(self.FAX_DIRECTOR_PATH,f'[v]{src_file}') 
+            os.rename(src_file_path, dst_file_name)
+            
+        except FileNotFoundError :
+            print(f'Error: The file {src_file} does not exist.')
+            
+        except FileExistsError :
+            print(f'Error: The file {dst_file_name} does not exist.')
     
-
+    def delete_file(self,src_file):
+        try : 
+            os.remove(os.path.join(self.FAX_DIRECTOR_PATH,src_file))
+            
+        except FileNotFoundError :
+            print(f'Error: The file {src_file} does not exist.')
+                
+    def run_with_viewer(self,src_file):
         
-    def __get_directory_file(self):
-        self.faxFiles = glob.glob(self.FAX_DIRECTOR_PATH +'/*.*')
-        return  
-        # return  [file for file in load_files if file.endswith('.jpg')]
-    
-    def __get_sorted_faxfiles(self,file_list):
+        try : 
+            file_path = os.path.join(self.FAX_DIRECTOR_PATH,src_file)
+            
+            cmd = f'{self.EXTENTION_VIEWER} {file_path}'
+            subprocess.Popen(cmd)
+        
+        except FileNotFoundError :
+            print(f'Error: The file {src_file} does not exist.')
+        
+    def _get_files_inDirectory(self):
+        try : 
+            os.path.isdir(self.FAX_DIRECTOR_PATH)
+            return os.listdir(self.FAX_DIRECTOR_PATH)
+            
+        except FileNotFoundError:
+            print(f"Error: The directory '{self.FAX_DIRECTOR_PATH}' does not exist.")
+            
+    def _get_sorted_faxfiles(self,file_list):
         checked_list = []
         unchecked_list = [] 
         
-        file_list.sort(key=os.path.getmtime)
+        file_list.sort(key=lambda x: os.path.getmtime(os.path.join(self.FAX_DIRECTOR_PATH, x)))
 
         for f in file_list:
-            if os.path.basename(f)[1] == 'v':
+            if f[1] == 'v':
                 checked_list.append(f)
             else :
                 unchecked_list.append(f)
         return unchecked_list, checked_list
-    
-    def get_faxfiles(self):
-        return self.__get_sorted_faxfiles(self.__get_directory_file())     
-    
-    
-    def Rename_file(self, dst_name):
-        if os.path.isfile(self.selectedfile):
-            file_ext = os.path.splitext(self.selectedfile)[1] 
-            file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(self.selectedfile)))
-            dst_file_name = f'{self.FAX_DIRECTOR_PATH}{dst_name}_{file_ctime}{file_ext}'
-            # print(f'src_file : {src_file}')
-            # print(f'dst_file : {dst_file_name}')
-            os.rename(self.selectedfile, dst_file_name)
-                    
-        else :
-            print(f'Rename_file error : {dst_name} is not found')
-    
-    def Checking_file(self):
-        if os.path.isfile(self.selectedfile):
-            f_name = os.path.basename(self.selectedfile)
-            # print(f'Checking_file {f_name=}')
-            
-            if f_name[1] == 'v':
-                d_name = f_name.split('[v]')
-                dst_file_name = f'{self.FAX_DIRECTOR_PATH}{d_name[1]}'
-            else :
-                dst_file_name = f'{self.FAX_DIRECTOR_PATH}[v]{f_name}'
-            print(f'Checking_file src_file : {self.selectedfile}')
-            print(f'Checking_file dst_file : {dst_file_name}')
-            os.rename(self.selectedfile, dst_file_name)
-                    
-        else :
-            print(f'Rename_file error : {src_file} is not found')
-    
-    def Delete_file(self):
-        print(f'Delete_file={self.selectedfile}')
-        
-        if os.path.isfile(self.selectedfile):
-            os.remove(self.selectedfile)
-        else : 
-            print(f"Delete_file error : {self.selectedfile} is not found")
-        
-    def Run_with_viewer(self):
-        cmd = f'{self.EXTENTION_VIEWER} {self.selectedfile}'
-        # print(f'__run_with_viewer = {cmd}')
-        subprocess.Popen(cmd)
-        
-    
-        
-            
+

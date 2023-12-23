@@ -53,7 +53,7 @@ class App(tk.Tk):
         super().__init__()
 
         self.title('웅천목재 프로그램')
-        self.geometry('600x800')
+        self.geometry('600x800+1850+10')
 
 
 if __name__ == "__main__":
