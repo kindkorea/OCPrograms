@@ -1,36 +1,39 @@
 import tkinter as tk
-from tkinter import ttk
 
-class NumberEntryApp(tk.Tk):
-    def __init__(self):
-        super().__init__()
+def add_row():
+    new_row = []
+    for j in range(5):
+        entry = tk.Entry(root)
+        entry.grid(row=len(entry_list), column=j, padx=5, pady=5)
+        new_row.append(entry)
+    entry_list.append(new_row)
 
-        self.title("Number Entry")
-        self.geometry("300x100")
+def remove_row():
+    if entry_list:
+        row_to_remove = entry_list.pop()
+        for entry in row_to_remove:
+            entry.destroy()
 
-        self.create_widgets()
+root = tk.Tk()
+root.title("Row 추가/삭제 예제")
 
-    def create_widgets(self):
-        label = tk.Label(self, text="Enter Number:")
-        label.grid(row=0, column=0, padx=10, pady=10)
+entry_list = []
 
-        self.number_entry = ttk.Entry(self)
-        self.number_entry.grid(row=0, column=1, padx=10, pady=10)
+# 초기에 5x5의 Entry 위젯 생성
+for i in range(5):
+    row = []
+    for j in range(5):
+        entry = tk.Entry(root)
+        entry.grid(row=i, column=j, padx=5, pady=5)
+        row.append(entry)
+    entry_list.append(row)
 
-        convert_button = tk.Button(self, text="Convert", command=self.convert_number)
-        convert_button.grid(row=1, column=0, columnspan=2, pady=10)
+# + 버튼 생성 및 클릭 시 add_row 함수 호출
+add_button = tk.Button(root, text="+", command=add_row)
+add_button.grid(row=5, column=0, pady=5)
 
-        self.result_label = tk.Label(self, text="")
-        self.result_label.grid(row=2, column=0, columnspan=2, pady=10)
+# - 버튼 생성 및 클릭 시 remove_row 함수 호출
+remove_button = tk.Button(root, text="-", command=remove_row)
+remove_button.grid(row=5, column=1, pady=5)
 
-    def convert_number(self):
-        try:
-            entered_number = int(self.number_entry.get())
-            formatted_number = '{:,}'.format(entered_number)  # 천 단위로 구분
-            self.result_label.config(text=f"Formatted Number: {formatted_number}")
-        except ValueError:
-            self.result_label.config(text="Invalid input. Please enter a valid number.")
-
-if __name__ == "__main__":
-    app = NumberEntryApp()
-    app.mainloop()
+root.mainloop()

@@ -3,7 +3,7 @@ import os
 import tkinter as tk
 from tkinter import ttk
 from tkinter import * # __all__
-
+import lib_movefile
 # import directory_name
 
 # PATH = 'C:/Users/kindk/OneDrive/OCWOOD_OFFICE/002_매입처/01_수신팩스/'
@@ -47,6 +47,51 @@ CompanyList = {
     '형제철물':    '형제철물_철물',
     '홍진테크':    '홍진테크_흡음재',
 }
+class FileMove:
+    def __init__(self, master, src_files, src_path, dst_dir):
+        
+        self.main_data = CompanyList.keys()
+        # self.src_files = src_files
+        
+        self.master = master
+        self.master_position_X = self.master.winfo_rootx()
+        self.master_position_Y = self.master.winfo_rooty()
+        
+        self.popup_window = Toplevel(master)
+        self.popup_window.title("Move file Window")
+        self.popup_window.geometry(f'200x300+{self.master_position_X}+{self.master_position_Y+300}')
+        
+        self.move_file = lib_movefile.MoveFile( src_path , src_files, dst_dir)
+        
+        self.valid_datas, self.invalid_datas = self.move_file.get_fileList()
+
+        self.create_widgets()
+        
+    def create_widgets(self):
+        self.mid_frame = Frame(self.popup_window)
+        self.mid_frame.grid(row=1,column=0) 
+
+        all_data = self.valid_datas + self.invalid_datas
+        for ix , file in enumerate(all_data):
+            
+            if file[2] == '':
+                self.create_rowLine(self.mid_frame, ix, file[0],file[1],'가능함')
+            else :
+                self.create_rowLine(self.mid_frame, ix, file[0],file[1],file[2])
+                
+        
+        self.bottomFrame = Frame(self.popup_window )
+        self.bottomFrame.grid(row=2,column=0) 
+        Button(self.bottomFrame, text = '확인').grid(row=0, column=0)
+        Button(self.bottomFrame, text = '취소', command=self.popup_window.destroy).grid(row=0, column=1)
+
+
+    def create_rowLine(self,container, row, src_file, dest_dir, result):
+        Label(container,  text=src_file, justify="left").grid(row=row, column=0)
+        Label(container, text=f'→   {dest_dir} :', justify="left" ).grid(row=row, column=1)
+        Label(container, text=result).grid(row=row, column=2)
+        
+        
 
 class CompanyListWidget:
     def __init__(self, master, handler):
@@ -62,18 +107,19 @@ class CompanyListWidget:
         
         self.popup_window = Toplevel(master)
         self.popup_window.title("Popup Window")
-        self.popup_window.geometry(f'200x300+{self.master_position_X}+{self.master_position_Y+100}')
+        self.popup_window.geometry(f'200x300+{self.master_position_X}+{self.master_position_Y+300}')
         self.selected_item = StringVar()
         self.search_str = StringVar()
         
         self.search = Entry(self.popup_window, textvariable=self.search_str )
         self.search.grid(row=0,column=0,pady=10)
-        self.search.bind('<Key>', self.handler_key)
-        
+        self.search.focus()
+        self.search.bind('<Key>', self._handler_key)
+        # self.search.bind("<KeyPress>", self.cb_search)
      
         self.listbox = Listbox(self.popup_window, selectmode = 'single')
-        self.listbox.bind('<<ListboxSelect>>', self.__handlerList)
-        self.listbox.bind('<Double-Button-1>', self.__handlerList)
+        self.listbox.bind('<<ListboxSelect>>', self._handlerList)
+        self.listbox.bind('<Double-Button-1>', self._handlerList)
         self.listbox.grid(row=1,column=0)
         
         self.scrollbar=Scrollbar(self.popup_window, orient='vertical' ,command=self.listbox.yview)
@@ -85,10 +131,10 @@ class CompanyListWidget:
         
         self.fill_listbox(self.main_data)
 
-    def __handlerList(self, e):
+    def _handlerList(self, e):
         selected_index = self.listbox.curselection()
         if selected_index:
-            selected_value = self.listbox.get(selected_index)
+            selected_value = self.listbox.get(selected_index[0])
             self.select_handler(selected_value)
             self.popup_window.destroy()
             
@@ -96,34 +142,42 @@ class CompanyListWidget:
     # def __handler_listbox_double_click(self, e):
     #     self.select_handler(self.selected_item)
     
-    def handler_key(self,e):
+    def _handler_key(self,e):
         key = e.keycode
         print(key)
         
         if key == 40 or key == 38 : # arrow up down
             self.listbox.focus()
-        elif key == 13 or key == 32 : # enter and space
-            self.cb_search()
+        # elif key == 13 or key == 32 : # enter and space
         
+        self.cb_search()
         
+    def search_korean_list(self, search_term, korean_list):
+        if search_term in korean_list:
+            return search_term
+   
     def cb_search(self):
         sstr = self.search_str.get()
-        self.listbox.delete(0, END)
-        # If filter removed show all data
+        
+        filtered_data = []
         if sstr == "":
-            self.fill_listbox(self.main_data) 
+            self.fill_listbox(self.main_data)
             return
-    
-        filtered_data = list()
+        
         for item in self.main_data:
-            if item.find(sstr) >= 0:
+            if sstr in item:
                 filtered_data.append(item)
-    
-        self.fill_listbox(filtered_data)   
+                
+        if not filtered_data:
+            return    
+        self.fill_listbox(filtered_data) 
+        
     
     def fill_listbox(self, ld):
+        self.listbox.delete(0, END)
         for item in ld:
             self.listbox.insert(END, item)
+       
     
     def get_filename(self):
         return self.search.get()
@@ -143,20 +197,15 @@ class App(Tk):
 
         self.__create_widgets()
 
+
+    
     def __create_widgets(self):
-        # create the input frame
-        # input_frame = gui_pdf2jpg.Pdf2jpg(self,8)
-        # input_frame.grid(column=0, row=0)
-        c_list = CompanyList.keys()
-        
-        # print(key)
-        fax_receive = CompanyListWidget(self, c_list ,self.handler)
-        fax_receive.grid(column=0, row=1)
-        # # create the button frame
-        # button_frame = gui_pdf2jpg.Cb_Btn_frame(self,8)
+        # c_list = CompanyList.keys()
+        c_list = ['sadfasdf', '[v]형제철물_2023-12-08.jpg','[v]호성주유소_20231201_151702.jpg']
+        fax_receive = FileMove(self ,c_list,'./fax_receive','./fax_receive')
         
     def handler(self,f_name):
-        print('evnet {f_name}')
+        print(f'evnet {f_name}')
 
         
 if __name__ == "__main__":

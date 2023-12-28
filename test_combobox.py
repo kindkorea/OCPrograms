@@ -1,49 +1,58 @@
+import tkinter as tk
 
-from tkinter import Tk, Listbox, Entry, StringVar, END, mainloop
+class EntryGridApp(tk.Frame):
+    def __init__(self, root, count_row, count_col, enter_handler):
+        self.root = root
+        self.root.title("Entry Grid Example")
 
-import directory_name
+        # 5x5 크기의 엔트리 그리드 생성
+        self.entries = [[tk.Entry(root, width=5) for _ in range(5)] for _ in range(5)]
+        self.current_row = 0
+        self.current_column = 0
 
-def handler_key(e):
-    key = e.keycode
-    print(key)
-    
-    if key == 40 or key == 38 : # arrow up down
-        listbox.focus()
-    elif key == 13 or key == 32 : # enter and space
-        cb_search()
-    
-    
-def cb_search():
-    sstr = search_str.get()
-    listbox.delete(0, END)
-    # If filter removed show all data
-    if sstr == "":
-        fill_listbox(main_data) 
-        return
-  
-    filtered_data = list()
-    for item in main_data:
-        if item.find(sstr) >= 0:
-            filtered_data.append(item)
-   
-    fill_listbox(filtered_data)   
-  
-def fill_listbox(ld):
-    for item in ld:
-        listbox.insert(END, item)
-  
-  
-main_data = directory_name.forder_list.keys()
-  
-# GUI
-master = Tk()
-listbox = Listbox(master,selectmode = 'single')
-listbox.pack()
-fill_listbox(main_data)
-  
-search_str = StringVar()
-search = Entry(master, textvariable=search_str, width=10 )
-search.pack()
-search.bind('<Key>', handler_key)
-  
-mainloop()
+        # 엔트리 배치
+        for row in range(5):
+            for col in range(5):
+                self.entries[row][col].grid(row=row, column=col, padx=5, pady=5)
+
+        # 방향키 이벤트 바인딩
+        self.root.bind("<Left>", self.move_left)
+        self.root.bind("<Right>", self.move_right)
+        self.root.bind("<Up>", self.move_up)
+        self.root.bind("<Down>", self.move_down)
+
+    def move_left(self, event):
+        self.move(-1, 0)
+
+    def move_right(self, event):
+        self.move(1, 0)
+
+    def move_up(self, event):
+        self.move(0, -1)
+
+    def move_down(self, event):
+        self.move(0, 1)
+
+    def move(self, dx, dy):
+        # 현재 위치에서 이동한 새 위치 계산
+        new_row = (self.current_row + dy) % 5
+        new_col = (self.current_column + dx) % 5
+
+        # 현재 위치의 엔트리에서 포커스 제거
+        self.entries[self.current_row][self.current_column].focus_set()
+
+        # 새 위치의 엔트리에 포커스 설정
+        self.entries[new_row][new_col].focus_set()
+
+        # 현재 위치 갱신
+        self.current_row = new_row
+        self.current_column = new_col
+
+# Tkinter 윈도우 생성
+root = tk.Tk()
+
+# 애플리케이션 인스턴스 생성
+app = EntryGridApp(root)
+
+# 윈도우 실행
+root.mainloop()

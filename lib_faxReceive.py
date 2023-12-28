@@ -10,19 +10,26 @@ class FaxReceive():
         
         self.EXTENTION_VIEWER = 'c:/Users/kindk/AppData/Local/Imagine/Imagine64.exe'
         self.FAX_DIRECTOR_PATH = file_path
-    
+        # self.samefile_index = 0
     def get_faxfiles(self):
         return self._get_sorted_faxfiles(self._get_files_inDirectory())     
     
     
     def rename_to_company(self, src_file ,dst_name):
         
+        # samefile_index =0
         src_path_file = os.path.join(self.FAX_DIRECTOR_PATH,src_file)
         if os.path.isfile(src_path_file):
             try : 
                 file_ext = os.path.splitext(src_file)[1] 
                 file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(src_path_file)))
                 dst_file_name = os.path.join(self.FAX_DIRECTOR_PATH, f'{dst_name}_{file_ctime}{file_ext}')
+                
+                for i in range(1,20):
+                    if os.path.isfile(dst_file_name):
+                        dst_file_name = os.path.join(self.FAX_DIRECTOR_PATH, f'{dst_name}_{file_ctime}_#{i}{file_ext}')
+                    else :
+                        break
                 os.rename(src_path_file, dst_file_name)
                 
             except FileExistsError :
