@@ -3,7 +3,7 @@ import glob
 import time
 import sys
 import subprocess
-
+import send2trash
 
 class FaxReceive():
     def __init__(self,file_path):
@@ -54,12 +54,16 @@ class FaxReceive():
             print(f'Error: The file {dst_file_name} does not exist.')
     
     def delete_file(self,src_file):
-        try : 
-            os.remove(os.path.join(self.FAX_DIRECTOR_PATH,src_file))
-            
+        try :
+            src_file_path = os.path.join(self.FAX_DIRECTOR_PATH,src_file)
+            if os.path.isfile(src_file_path):
+                try : 
+                    send2trash.send2trash(src_file_path)
+                except Exception as err :
+                    print(f'send2trash occur exception {err}')
         except FileNotFoundError :
             print(f'Error: The file {src_file} does not exist.')
-                
+            
     def run_with_viewer(self,src_file):
         
         try : 
