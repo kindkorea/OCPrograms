@@ -82,13 +82,8 @@ class App(Tk):
         self.__create_widgets()
 
     def __create_widgets(self):
-        # create the input frame
-        # input_frame = gui_pdf2jpg.Pdf2jpg(self,8)
-        # input_frame.grid(column=0, row=0)
         fax_receive = TransportCharge(self)
         fax_receive.grid(column=0, row=1)
-        # # create the button frame
-        # button_frame = gui_pdf2jpg.Cb_Btn_frame(self,8)
 
         
 if __name__ == "__main__":

@@ -2,13 +2,25 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import * # __all__
+import PIL
 import math
 import gui_pdf2jpg
 import gui_faxReceive
 import gui_calculator
+import gui_pdf2jpg
+import win32clipboard
 
-import gui_fax_pdf
 
+class FaxPdf(Frame):
+    def __init__(self, container):
+        super().__init__(container)
+    
+        a = gui_pdf2jpg.Pdf2jpg(self)
+        a.grid(row=1 , column=0 )
+        
+        b = gui_faxReceive.GUI_FaxReceive(self)
+        b.grid(row=2 , column=0 , pady = 20)
+        
 class ControlFrame(Frame):
     def __init__(self, container):
         super().__init__(container)
@@ -34,7 +46,7 @@ class ControlFrame(Frame):
         
         self.frames = {}
 
-        self.menu_list[0].append(gui_fax_pdf.FaxPdf(container))
+        self.menu_list[0].append(FaxPdf(container))
         self.menu_list[1].append(gui_calculator.Calculator(container))
         
         self.current_frame = self.menu_list[0][self.NUMBER_FRAME]
@@ -51,8 +63,8 @@ class ControlFrame(Frame):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-
-        self.title('웅천목재 프로그램')
+        # self.wm_attributes("-topmost",1)
+        self.title('웅천목재 프로그램 v.1')
         self.geometry('600x800+1850+10')
 
 

@@ -1,9 +1,7 @@
-
-import datetime
 from io import BytesIO
+import PIL
 from PIL import Image
 import win32clipboard
-# import time 
 import os
 
 from pdf2image import convert_from_path
@@ -36,32 +34,39 @@ class P2J():
         else : 
             print(f"There is no file")
             
-
-    def __most_recent_pdf( self):
-        load_files = glob.glob(self.PDF_SRC_PATH+'/*.*')
-        pdf_file_list = [file for file in load_files if file.endswith('.pdf' and '.PDF')]
-        pdf_files_with_time =[]
-        # print(pdf_file_list)
-        for pdf_file in pdf_file_list:
-            pdf_files_with_time.append((pdf_file,os.path.getctime(pdf_file)))
-        return max(pdf_files_with_time,key=lambda x: x[1])[0]
+    def _open_folder(self):
+        os.startfile(self.PDF_TO_JPG_DST_PATH)
     
-    def __cmd_createDirectory(self,directory):
+    def _most_recent_pdf( self):
+        
+        try :
+            load_files = glob.glob(self.PDF_SRC_PATH+'/*.*')
+            
+            pdf_file_list = [file for file in load_files if file.endswith('.pdf' and '.PDF')] #pdf 파일 검출
+            
+            pdf_files_with_time =[]
+            # print(pdf_file_list)
+            for pdf_file in pdf_file_list:
+                pdf_files_with_time.append((pdf_file,os.path.getctime(pdf_file)))
+            return max(pdf_files_with_time,key=lambda x: x[1])[0]
+        except : 
+            print("_most_recent_pdf err was ocurred")
+    
+    def _cmd_createDirectory(self,directory):
         try:
             if not os.path.exists(directory):
                 os.makedirs(directory)
         except Exception as e:
             print(f"Error: Failed to create the directory.{e}")
 
-    def __pdf_to_jpg(self, src_file , dst_path , change_filename):
+    def _pdf_to_jpg(self, src_file , dst_path , change_filename):
         
         try : 
             pages = convert_from_path(src_file, dpi=200, poppler_path='./poppler-23.11.0/Library/bin')
             output_filelist = []              
             file_path = f'{dst_path}/{change_filename}'
      
-            self.__cmd_createDirectory(file_path)
-            # print(file_path)
+            self._cmd_createDirectory(file_path)
             os.startfile(file_path)
 
             for i, page in enumerate(pages):
@@ -71,18 +76,19 @@ class P2J():
 
             return  output_filelist
         except Exception as e:
-            print(f"__pdf_ti_jpg : {e}")
+            print(f"__pdf_to_jpg : {e}")
 
    
-    def __cmd_re_name(self,src_file, dest_path, change_filename):
+    def _cmd_re_name(self,src_file, dest_path, change_filename):
         
         file_name_ext = os.path.basename(src_file)
-        file_name, file_ext = os.path.splitext(file_name_ext)
+        _ , file_ext = os.path.splitext(file_name_ext)
         file_path = f'{dest_path}/{change_filename}'
         rename = f'{file_path}/{change_filename}{file_ext}'
         
-        self.__cmd_createDirectory(file_path)
+        self._cmd_createDirectory(file_path)
         os.startfile(file_path)
+        
         if os.path.exists(rename):
             print(f"{rename} is exist")
         else :    
@@ -93,21 +99,23 @@ class P2J():
 
     def cmd_pdf_to_jpg(self,filename):
 
-        recent_pdf = self.__most_recent_pdf()
+        pdfFile = self._most_recent_pdf()
 
-        if not recent_pdf :
+        if not pdfFile :
             print('no pdf file')
         else :
-            self.converted_jpg_filelist = self.__pdf_to_jpg(recent_pdf , self.PDF_TO_JPG_DST_PATH,  filename)
+            self.converted_jpg_filelist = self._pdf_to_jpg(pdfFile , self.PDF_TO_JPG_DST_PATH,  filename)
         
     def get_converted_count(self):
-        if self.converted_jpg_filelist is not None:
+        if self.converted_jpg_filelist :
             return len(self.converted_jpg_filelist)
+        else :
+            return False
 
     def cmd_rename(self, filename):
       
-        recent_pdf = self.__most_recent_pdf()     
-        self.__cmd_re_name(recent_pdf, self.PDF_TO_JPG_DST_PATH, filename)
+        pdfFile = self._most_recent_pdf()     
+        self._cmd_re_name(pdfFile, self.PDF_TO_JPG_DST_PATH, filename)
        
 
         

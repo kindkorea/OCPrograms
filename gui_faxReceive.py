@@ -7,7 +7,6 @@ import tkinter.messagebox as msg
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from queue import Queue
-import directory_name
 from tkinter import messagebox
 import directory_name
 
@@ -32,6 +31,8 @@ class GUI_FaxReceive(Frame):
         self.container = self
         # self.grid(row=row, column=col , pady=20)
         # self.file_listbox
+        
+        self.selected_files = []
         self.__create_widgets()
         self.selected_file_from_Listbox = list()
         
@@ -45,7 +46,7 @@ class GUI_FaxReceive(Frame):
         self.fax_frame.grid(row=0,column=0, padx=10 ,pady = 10)
         
         self.FAX_R = lib_faxReceive.FaxReceive(self.FAX_DIRECTOR_PATH)
-        self.file_listbox = Listbox(self.fax_frame, width=50,  selectmode=MULTIPLE, highlightthickness=1) 
+        self.file_listbox = Listbox(self.fax_frame, width=50,  height=25, selectmode=EXTENDED, highlightthickness=1) 
         self.file_listbox.grid(row=0,column=0,rowspan=5) 
         
         self.scrollbar=Scrollbar(self.fax_frame, orient='vertical' ,command=self.file_listbox.yview)
@@ -54,8 +55,7 @@ class GUI_FaxReceive(Frame):
         self.file_listbox.config(yscrollcommand = self.scrollbar.set)
         
         self.file_listbox.bind("<Key>",self._handler_bind_key_from_file_listbox)
-        # self.file_listbox.bind("<Double-Button-1>",self._handler_bind_double_button1_from_file_listbox)
-        self.file_listbox.bind("<<ListboxSelect>>",self._handler_bind_ListboxSelect_from_file_listbox)
+        self.file_listbox.bind("<Double-Button-1>",self._handler_doubleClick_from_file_listbox)
         
         Button(self.fax_frame, width=13,  text="열기(ENTER)" , command=self._run_with_viewer).grid(row=0 ,column=2,  padx= 10 ,sticky='nsew')
         Button(self.fax_frame, width=13, text="이름변경(F2)" , command=self._handler_rename_to_company).grid(row=1,column=2, padx= 10 ,sticky='nsew') 
@@ -63,30 +63,28 @@ class GUI_FaxReceive(Frame):
         Button(self.fax_frame, width=13,  text="삭제(DEL)" , command=self._handler_btn_delete).grid(row=3 ,column=2,padx= 10 ,sticky='nsew')
         Button(self.fax_frame, width=13,  text="MoveAll" , command=self._handler_btn_file_move).grid(row=4 ,column=2,padx= 10 ,sticky='nsew')
         
-        # self.company_name = directory_name.CompanyListWidget(self.btn_frame,directory_name.CompanyList.keys(), self._handler_company_rename)
-        # app.Set_handler(event, self.__func_rename)
-        # self.company_name.grid(row=0, column=0, padx= 10, rowspan=5)
         self.to_change_company_name = StringVar()
         self._reset_listbox()
+        
         # Observer 생성
-        handler = CustomHandler(self)
-        self.observer = Observer()
-        self.observer.schedule(handler, self.FAX_DIRECTOR_PATH, recursive=True)
-        self.queue = Queue()
-        self.observer.start()
+        # handler = CustomHandler(self)
+        # self.observer = Observer()
+        # self.observer.schedule(handler, self.FAX_DIRECTOR_PATH, recursive=True)
+        # self.queue = Queue()
+        # self.observer.start()
 
 
-
+    def _handler_doubleClick_from_file_listbox(self,e):
+        self._run_with_viewer()
             
     def _run_with_viewer(self):  # run viewer 
-        if  self.selected_file_from_Listbox : 
-            for src_name in self.selected_file_from_Listbox:
+        selected_file = self._get_from_file_listbox()
+        if  selected_file : 
+            for src_name in selected_file:
                 self.FAX_R.run_with_viewer(src_name)
-            # self._reset_listbox()
         else :
             print('self.selected_file_from_Listbox is empty')
         
-
     def _reset_listbox(self):
         self.file_listbox.delete(0,END)
         unchecked, checked = self.FAX_R.get_faxfiles()
@@ -116,7 +114,7 @@ class GUI_FaxReceive(Frame):
     def _handler_bind_key_from_file_listbox(self, event):
         
         code = event.keycode
-        print(code)
+        # print(code)
         if code == 46:  #key : del
             self._handler_btn_delete()
             
@@ -135,21 +133,29 @@ class GUI_FaxReceive(Frame):
         #     print('up')     
         # elif code == 40:  #key : down
         #     print('down')     
+    # def _handler_bind_ListboxSelect_from_file_listbox(self , event):
+    #     selected_indices = self.file_listbox.curselection()
+    #     if selected_indices :
+    #         self.selected_file_from_Listbox = [self.file_listbox.get(idx) for idx in selected_indices]
         
-    def _handler_bind_ListboxSelect_from_file_listbox(self , event):
+    def _get_from_file_listbox(self):
         selected_indices = self.file_listbox.curselection()
         if selected_indices :
-            self.selected_file_from_Listbox = [self.file_listbox.get(idx) for idx in selected_indices]
+            return [self.file_listbox.get(idx) for idx in selected_indices]
+        
         
     
     def _handler_rename_to_company(self):
         """ pop up window and get company name"""
-        app= directory_name.CompanyListWidget(self, self.popup_handler_from_rename )
-        
+        self.selected_files = self._get_from_file_listbox()
+        if  self.selected_files: 
+            directory_name.CompanyListWidget(self, self.popup_handler_from_rename )
+    
         
     def popup_handler_from_rename(self, dst_name):
-        if  self.selected_file_from_Listbox : 
-            for src_name in self.selected_file_from_Listbox:
+        if  self.selected_files: 
+            for src_name in self.selected_files:
+                # if msg.askyesno('파일 이름 변경', f'{src_name} => {dst_name}'):
                 self.FAX_R.rename_to_company(src_name , dst_name)           
             self._reset_listbox()
         else :
@@ -158,17 +164,25 @@ class GUI_FaxReceive(Frame):
     
         
     def _handler_btn_check(self):
-        if  self.selected_file_from_Listbox : 
-            for src_name in self.selected_file_from_Listbox:
+        selected_file = self._get_from_file_listbox()
+        if  selected_file : 
+            for src_name in selected_file:
                 self.FAX_R.is_checked(src_name)           
             self._reset_listbox()
         else :
             print('self.selected_file_from_Listbox is empty')    
          
     def _handler_btn_delete(self):
-        if  self.selected_file_from_Listbox : 
-            for src_name in self.selected_file_from_Listbox :
-                if messagebox.askyesno('파일삭제', f'{src_name}을 삭제할까요?') :
+        
+        selected_file = self._get_from_file_listbox()
+        if  selected_file : 
+            for src_name in selected_file:
+               
+                if messagebox.askyesno('파일삭제', 
+                                       f'{src_name}을 삭제할까요?',
+                                        # parent=self,
+                                        # geometry="+{}+{}".format(self.winfo_x(), self.winfo_y()),
+                                       ) :
                     self.FAX_R.delete_file(src_name)           
             self._reset_listbox()
         else :
@@ -176,7 +190,10 @@ class GUI_FaxReceive(Frame):
 
     def _handler_btn_file_move(self):     
         # print("__handler_btn_file_move")
-        directory_name.FileMove(self , self.selected_file_from_Listbox ,self.FAX_DIRECTOR_PATH, self.FAX_DIRECTOR_PATH)
+        selected_file = self._get_from_file_listbox()
+        if  selected_file : 
+            for src_name in selected_file:
+                directory_name.FileMove(self , self.selected_file_from_Listbox ,self.FAX_DIRECTOR_PATH, self.FAX_DIRECTOR_PATH)
         
         
     def _handler_btn_file_move_all(self):     

@@ -49,17 +49,3 @@ class MarginCalc():
         for i in self.data_list:
             print(type(i))
             
-
-        
-   
-            
-# a = MarginCalc()
-
-# data =  [10000, 10, 0,0,0,0]
-
-# a.priceList = data
-
-# # print(a.priceList)
-# a.calc_by_margin_rate()
-# a.ddd()
-# print(a.priceList)

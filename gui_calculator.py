@@ -29,24 +29,29 @@ class CalculatorForTimber(tk.Frame):
         
         self.type_on = True
         self.separator = MySeparator()
+        
+        self.row_count = 0
         self.create_widgets()
         
     def create_widgets(self):
         # 엔트리 위젯을 담을 2차원 리스트 생성
         self.entry_widgets = []
         self.frame_top = tk.Frame(self.frame_CalcTimber)
-        self.frame_top.grid(row=0,column=0)
+        self.frame_top.grid(row=0,column=0, sticky='ew')
         
-        add_button = ttk.Button(self.frame_top, text="Add Row", command=self.create_row)
-        add_button.grid(row=0, column=0)
+        add_button = tk.Button(self.frame_top, width=3 , justify='left', text="+", command=self.create_row)
+        add_button.grid(row=0, column=0 , sticky='w')
         
-        tk.Label(self.frame_top , text ='총금액 : ', justify='right').grid(row=0,column=1, padx=15, sticky='e') 
+        add_button = tk.Button(self.frame_top, width=3 , justify='left', text="-", command=self.destroy_row)
+        add_button.grid(row=0, column=1, sticky='w')
+        
+        tk.Label(self.frame_top , text ='총금액 : ', justify='right').grid(row=0,column=2, padx=15, sticky='e') 
         self.totalCost = tk.Entry(self.frame_top, justify='left')
-        self.totalCost.grid(row=0,column=2) 
+        self.totalCost.grid(row=0,column=3) 
         
-        tk.Label(self.frame_top , text ='운반비 : ', justify='right').grid(row=0,column=3, padx=15, sticky='e')        
+        tk.Label(self.frame_top , text ='운반비 : ', justify='right').grid(row=0,column=4, padx=15, sticky='e')        
         self.transeCost = tk.Entry(self.frame_top, justify='left')
-        self.transeCost.grid(row=0,column=4,padx=5) 
+        self.transeCost.grid(row=0,column=5,padx=5) 
         
         self.title_list = ['품목', '수량계산기','수량','공급가액','금액/단위','운반비/단위']
         
@@ -119,10 +124,15 @@ class CalculatorForTimber(tk.Frame):
                     
 
         
+    def destroy_row(self):
+        for w in self.entry_widgets[self.row_count - 1]:
+            w.destroy()
         
+        self.row_count -= 1
         
         
     def create_row(self):
+        self.row_count += 1
         row_entries = []
         row_number = len(self.entry_widgets)
         # 엔트리 생성 및 라벨 추가
@@ -139,6 +149,7 @@ class CalculatorForTimber(tk.Frame):
         # 각 행의 버튼 설정
         button = ttk.Button(self.frame_mid, text=f"계산 {len(self.entry_widgets)}", command=lambda row=len(self.entry_widgets)-1: self._handler_calc_line(row))
         button.grid(row=len(self.entry_widgets), column=6)
+        self.entry_widgets.append(button)
 
     def get_transCostPer(self):
         
@@ -259,6 +270,7 @@ class Calculator(tk.Frame):
         calTimber = CalculatorForTimber(self)
         
         calTimber.grid(row=1, column=0,  padx=10 , pady= 20,sticky='ew')
+        CalculatorCash(self).grid(row=2, column=0,padx=10 , pady= 20,sticky='ew')
         
     def rm_comma(self, widget):
         return self.separator.remove_separator(widget.get())
@@ -377,6 +389,127 @@ class Calculator(tk.Frame):
         self.type_on = False
 
 
+
+
+class CalculatorCash(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        
+        self.mcal = mcal.MarginCalc()
+        self.frame_Calc = tk.LabelFrame(self, text='현금계산기')
+        self.frame_Calc.grid(row=0, column=0, padx= 10)
+        self.type_on = True
+        self.master = master
+        
+        
+        self.data_entry_list = ['오만원','만원','오천원','천원','총합계']
+            
+        
+        self.create_widgets()
+        
+        # 각 행의 버튼 설정
+        
+        button = ttk.Button(self.frame_Calc, text='초기화', command=self.reset_input_data)
+        button.grid(row=0, column=0)
+        
+        
+        button = ttk.Button(self.frame_Calc, text='계산 하기', command=self.calculate)
+        button.grid(row=1, column=0)
+        
+        
+    def create_widgets(self):
+        # 엔트리 위젯을 담을 2차원 리스트 생성
+        self.entry_widgets = []
+        # self.labels = ["Label"] + [f"Column {i}" for i in range(2, 7)]  # 열의 라벨
+        
+        for ix, title in enumerate(self.data_entry_list):
+            # label_text = self.labels[j]
+            label = ttk.Label(self.frame_Calc, text=title)
+            label.grid(row=0, column=ix+1)
+        
+        for _ in range(2):
+            self.create_row()
+        
+        
+    def create_row(self):
+        row_entries = []
+        row_number = len(self.entry_widgets)
+        # 엔트리 생성 및 라벨 추가
+        for j in range(1, len(self.data_entry_list)+1):
+            entry = ttk.Entry(self.frame_Calc, width=10, justify='right')
+            entry.grid(row=len(self.entry_widgets) + 1, column=j )
+            
+            entry.bind('<Return>',  self._handler_entry_enter)
+            entry.bind('<Key>', lambda event, row= row_number, col = j :  self._handler_key_press(event,row,col ))
+            row_entries.append(entry)
+            
+        self.entry_widgets.append(row_entries)
+
+        
+    def reset_input_data(self):
+        for widget in self.entry_widgets:
+            for w in widget:
+                w.delete(0,tk.END)
+    
+    def calculate(self):
+        total_per_cash = []
+        cash_count = int()
+        cash_amount = [50000,10000,5000,1000]
+        total_cash = int()
+        
+        
+        for ix, cash in enumerate(cash_amount):
+            getdata = self.entry_widgets[0][ix].get()
+            get_count = int()
+            if getdata == '':
+                get_count = 0
+            else : 
+                get_count = int(getdata)
+            cash_count += get_count
+            
+            calc_cash = get_count * cash
+            total_per_cash.append(calc_cash)
+            total_cash += calc_cash
+            
+        total_per_cash.append(total_cash)
+        
+        self.entry_widgets[0][4].delete(0,tk.END)
+        self.entry_widgets[0][4].insert(0,'{:,d}'.format(cash_count))
+        widget = self.entry_widgets[1]
+        for ix , cash in enumerate(total_per_cash):
+            widget[ix].delete(0,tk.END)
+            widget[ix].insert(0,'{:,d}'.format(cash))
+        
+   
+    def _handler_key_press(self,event,row,col):
+        pass
+        # if not self.type_on and event.char.isdigit():
+        #     event.widget.delete(0,tk.END)
+        #     self.type_on = True
+            
+        # keyCode = event.keycode
+        # r_row = row
+        # r_col = col-1
+        
+        # number_row = len(self.entry_widgets)
+        # number_col = len(self.data_entry_list)
+        
+        # if keyCode == 37:  # arrow key : left
+        #     r_col = (r_col -1) % number_col
+        # elif keyCode == 38: # arrow key : top
+        #     r_row = (r_row -1) % number_row
+        # elif keyCode == 39: # arrow key : right
+        #     r_col = (r_col +1) % number_col
+        # elif keyCode == 40: # arrow key : bottom
+        #     r_row = (r_row +1) % number_row
+        
+        # self.entry_widgets[r_row][r_col].focus_set()
+        
+    
+    def _handler_entry_enter(self,e):
+        '''intitialize data'''
+        self.calculate()
+        
         
         
 class App(tk.Tk):
@@ -389,7 +522,7 @@ class App(tk.Tk):
 
 if __name__ == "__main__":
     app = App()
-    Calculator(app).grid(row=0,column=0)
+    CalculatorCash(app).grid(row=0,column=0)
     app.mainloop()
             
         

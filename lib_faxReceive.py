@@ -3,7 +3,7 @@ import glob
 import time
 import sys
 import subprocess
-import send2trash
+import shutil
 
 class FaxReceive():
     def __init__(self,file_path):
@@ -21,8 +21,16 @@ class FaxReceive():
         src_path_file = os.path.join(self.FAX_DIRECTOR_PATH,src_file)
         if os.path.isfile(src_path_file):
             try : 
+                
+                file_stat = os.stat(src_path_file)
+                created_timestamp = file_stat.st_ctime
+                file_ctime = time.strftime('%Y-%m-%d', time.localtime(created_timestamp))
+
+
                 file_ext = os.path.splitext(src_file)[1] 
-                file_ctime = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(src_path_file)))
+                # file_ctime = os.path.getctime(src_path_file)
+                # file_ctime = time.gmtime(file_ctime)
+                # file_ctime = time.strftime("%Y-%m-%d",file_ctime )
                 dst_file_name = os.path.join(self.FAX_DIRECTOR_PATH, f'{dst_name}_{file_ctime}{file_ext}')
                 
                 for i in range(1,20):
@@ -58,7 +66,8 @@ class FaxReceive():
             src_file_path = os.path.join(self.FAX_DIRECTOR_PATH,src_file)
             if os.path.isfile(src_file_path):
                 try : 
-                    send2trash.send2trash(src_file_path)
+                    # send2trash.send2trash(src_file_path)
+                    shutil.move(src_file_path, f'{self.FAX_DIRECTOR_PATH}/../FAX_trashBin')
                 except Exception as err :
                     print(f'send2trash occur exception {err}')
         except FileNotFoundError :

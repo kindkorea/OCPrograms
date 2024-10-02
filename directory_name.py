@@ -2,8 +2,10 @@ import os
 
 import tkinter as tk
 from tkinter import ttk
+import tkinter.messagebox as msgbox
 from tkinter import * # __all__
 import lib_movefile
+
 # import directory_name
 
 # PATH = 'C:/Users/kindk/OneDrive/OCWOOD_OFFICE/002_매입처/01_수신팩스/'
@@ -59,7 +61,8 @@ class FileMove:
         
         self.popup_window = Toplevel(master)
         self.popup_window.title("Move file Window")
-        self.popup_window.geometry(f'200x300+{self.master_position_X}+{self.master_position_Y+300}')
+        self.popup_window.geometry(f'200x300+{self.master_position_X+300}+{self.master_position_Y+300}')
+        # self.popup_window.wm_attributes("-topmost", 1)
         
         self.move_file = lib_movefile.MoveFile( src_path , src_files, dst_dir)
         
@@ -94,11 +97,11 @@ class FileMove:
         
 
 class CompanyListWidget:
-    def __init__(self, master, handler):
+    def __init__(self, master, handler ):
         
         self.main_data  =  CompanyList.keys()
         self.select_handler = handler
-        
+      
         
         self.master = master
         self.master_position_X = self.master.winfo_rootx()
@@ -115,6 +118,8 @@ class CompanyListWidget:
         self.search.grid(row=0,column=0,pady=10)
         self.search.focus()
         self.search.bind('<Key>', self._handler_key)
+        self.search.bind('<Return>', self._handlerReturnEntry)
+        self.search.bind('<Escape>', self._closer)
         # self.search.bind("<KeyPress>", self.cb_search)
      
         self.listbox = Listbox(self.popup_window, selectmode = 'single')
@@ -127,16 +132,32 @@ class CompanyListWidget:
         
         self.listbox.config(yscrollcommand = self.scrollbar.set)
         
+        Button(self.popup_window , text='선택', command=self._send_changing_name).grid(row=2,sticky='ew')
+        
         
         
         self.fill_listbox(self.main_data)
-
+    def _closer(self,e):
+        self.popup_window.destroy()   
+        
+    def _handlerReturnEntry(self, e):
+        self._send_changing_name()
+        
+        
+    def _send_changing_name(self):
+        get_name = self.search.get()
+        if msgbox.askyesno("check changing name",f"Did you choice [{get_name}]"):
+           self.select_handler(get_name)
+        
+        self._closer()
+        
+        
     def _handlerList(self, e):
         selected_index = self.listbox.curselection()
         if selected_index:
             selected_value = self.listbox.get(selected_index[0])
-            self.select_handler(selected_value)
-            self.popup_window.destroy()
+            self.search.delete(0,END)
+            self.search.insert(0,selected_value)
             
             
     # def __handler_listbox_double_click(self, e):
