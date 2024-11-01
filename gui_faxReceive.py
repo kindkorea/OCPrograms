@@ -22,15 +22,45 @@ class CustomHandler(FileSystemEventHandler):
     def on_modified(self, event): self.app.notify(event)
     def on_moved(self, event): self.app.notify(event)
 
-                
+class CompanyButtonApp:
+    def __init__(self, root , callback ):
+        self.root = root
+        # self.root.title("Grid Button App")
+        self.companies = [
+            "건한",
+            "나산팀버",
+            "대한테이프",
+            "두산종합목재",
+            "삼원목재",
+            "에스디팀버",
+            "온보드",
+            "우진프레임",
+            "원스탑우드",
+            "진양",
+            "케이디우드",
+            "크나우프",
+            "태진목재",
+            "한국산업"
+        ]
+        self.callback = callback
+        self.create_buttons()
 
-class GUI_FaxReceive(Frame):
-    def __init__(self, container):
-        super().__init__(container)
+    def create_buttons(self):
+        for index, title in enumerate(self.companies):
+            row = index // 5
+            column = index % 5
+            button = Button(self.root, text=title, command=lambda x=title: self.callback(x))
+            button.grid(row=row, column=column, padx=5, pady=5 , sticky='ew')
+
+    # def button_action(self, button_number):
+    #     print(f"{button_number}")
         
-        self.container = self
-        # self.grid(row=row, column=col , pady=20)
-        # self.file_listbox
+                        
+
+class GUI_FaxReceive():
+    def __init__(self, containerFrame):
+        
+        self.container = containerFrame
         
         self.selected_files = []
         self.__create_widgets()
@@ -46,7 +76,7 @@ class GUI_FaxReceive(Frame):
         self.fax_frame.grid(row=0,column=0, padx=10 ,pady = 10)
         
         self.FAX_R = lib_faxReceive.FaxReceive(self.FAX_DIRECTOR_PATH)
-        self.file_listbox = Listbox(self.fax_frame, width=50,  height=25, selectmode=EXTENDED, highlightthickness=1) 
+        self.file_listbox = Listbox(self.fax_frame, width=30,  height=25, selectmode=EXTENDED, highlightthickness=1) 
         self.file_listbox.grid(row=0,column=0,rowspan=5) 
         
         self.scrollbar=Scrollbar(self.fax_frame, orient='vertical' ,command=self.file_listbox.yview)
@@ -63,16 +93,20 @@ class GUI_FaxReceive(Frame):
         Button(self.fax_frame, width=13,  text="삭제(DEL)" , command=self._handler_btn_delete).grid(row=3 ,column=2,padx= 10 ,sticky='nsew')
         Button(self.fax_frame, width=13,  text="MoveAll" , command=self._handler_btn_file_move).grid(row=4 ,column=2,padx= 10 ,sticky='nsew')
         
+        
+        self.frameBtnCompanies = Frame(self.container)
+        self.frameBtnCompanies.grid(row=1,column=0)
+        CompanyButtonApp(self.frameBtnCompanies  , self._func_rename)
+        
+        
         self.to_change_company_name = StringVar()
         self._reset_listbox()
         
-        # Observer 생성
-        # handler = CustomHandler(self)
-        # self.observer = Observer()
-        # self.observer.schedule(handler, self.FAX_DIRECTOR_PATH, recursive=True)
-        # self.queue = Queue()
-        # self.observer.start()
-
+        
+    def _func_rename(self, title):
+        self.popup_handler_from_rename( title)
+        
+        # print(title)
 
     def _handler_doubleClick_from_file_listbox(self,e):
         self._run_with_viewer()
@@ -103,8 +137,7 @@ class GUI_FaxReceive(Frame):
     def notify_creation(self,event):
         print(f'file created{event.src_path}' )
         
-        # if event.src_path.endswith('.jpg'):
-        #     self.popup_window(event.src_path)
+
     
     def notify(self, event):
         
@@ -149,8 +182,14 @@ class GUI_FaxReceive(Frame):
         """ pop up window and get company name"""
         self.selected_files = self._get_from_file_listbox()
         if  self.selected_files: 
-            directory_name.CompanyListWidget(self, self.popup_handler_from_rename )
+            directory_name.CompanyListWidget(self.container, self.popup_handler_from_rename )
     
+    # def _handler_rename_to_company(self):
+    #     """ pop up window and get company name"""
+    #     self.selected_files = self._get_from_file_listbox()up_handler_from_rename )
+    
+    #     if  self.selected_files: 
+    #         directory_name.CompanyListWidget(self.container, self.pop
         
     def popup_handler_from_rename(self, dst_name):
         if  self.selected_files: 
@@ -202,27 +241,11 @@ class GUI_FaxReceive(Frame):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 class App(Tk):
     def __init__(self):
         super().__init__()
         self.title('Replace')
         self.geometry('500x500+2000+100')
-        # self.resizable(0, 0)
-        # windows only (remove the minimize/maximize button)
-        # self.attributes('-toolwindow', True)
-
         # layout on the root window
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
@@ -230,16 +253,10 @@ class App(Tk):
         self.__create_widgets()
 
     def __create_widgets(self):
-        # create the input frame
-        # input_frame = gui_pdf2jpg.Pdf2jpg(self,8)
-        # input_frame.grid(column=0, row=0)
-        
-        # fax_path = 'C:/Users/kindk/OneDrive/OCWOOD_OFFICE/FAX_received/'
+
         fax_receive = GUI_FaxReceive(self)
-        fax_receive.grid(column=0, row=1)
-        # # create the button frame
-        # button_frame = gui_pdf2jpg.Cb_Btn_frame(self,8)
-        # button_frame.grid(column=0, row=1)
+        # fax_receive.grid(column=0, row=1)
+
 
 
 if __name__ == "__main__":

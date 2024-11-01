@@ -9,12 +9,12 @@ from io import BytesIO
 import win32clipboard
 
 
-class Pdf2jpg(Frame):
-    def __init__(self, container):
-        super().__init__(container)
+class Pdf2jpg():
+    def __init__(self, containerFrame):
+        # super().__init__(container)
         # setup the grid layout manager
         
-        self.container = self
+        self.container = containerFrame
         # self.columnconfigure(0, weight=1)
         # self.columnconfigure(0, weight=3)
         
@@ -58,7 +58,7 @@ class Pdf2jpg(Frame):
         for i in range(self.cb_btns):
             self.cb_btn_list.append(self._make_btn(self.btn_f, 1, i , 5, f'CB_{i+1}'))
 
-        for widget in self.winfo_children():
+        for widget in self.container.winfo_children():
             widget.grid(padx=1, pady=3)
             
     def _popup_asking_filename(self):

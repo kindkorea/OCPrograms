@@ -56,8 +56,13 @@ class FileMove:
         # self.src_files = src_files
         
         self.master = master
-        self.master_position_X = self.master.winfo_rootx()
-        self.master_position_Y = self.master.winfo_rooty()
+        # self.master_position_X = self.master.winfo_rootx()
+        # self.master_position_Y = self.master.winfo_rooty()
+        
+        self.master_position_Y = 100
+        
+        self.master_position_X = 100
+        
         
         self.popup_window = Toplevel(master)
         self.popup_window.title("Move file Window")
