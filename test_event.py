@@ -1,38 +1,78 @@
-# class test:
-#     # c = 8
-#     @classmethod 
-#     def __mySum(cls, a,b):
-#         return a+b+cls.c
+import tkinter as tk
+from tkinter import filedialog
+from configparser import ConfigParser
+import os
+class SettingsApp(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.master = master
+        # self.grid()
+        self.config_file = 'settings.int'
+        self.create_widgets()
+        self.configure_phaser_read()
     
-    
-
-
-# print(test.__mySum(3,5))
-
-
-class Singer:
-    def __init__(self, name):
-        self.name = name
-    def introduce(self) : 
-        print("안녕하세요! 가수 %s입니다." % self.name)
-    
-    def __str__(self):
-        return 'I love Kpop.'
+    def create_widgets(self):
+        # Label
+        self.label = tk.Label(self, text="Folder Path:")
+        self.label.grid(row=0, column=0)
         
+        # Entry
+        self.entry = tk.Entry(self, width=50)
+        self.entry.grid(row=0, column=1)
         
-class KPopGroup(Singer):
+        # Button
+        self.button = tk.Button(self, text="Browse", command=self.save_folder_path)
+        self.button.grid(row=0, column=2)
     
-    def __init__(self, name, cnt):
-        super().__init__(name)
-        self.nt = cnt
-    
-    def introduce(self):
-        super().introduce()
-        print('우린 Kpop 그룹으로 %d명 입니다.' % self.nt)
+    def save_folder_path(self):
+        # 폴더 선택 대화상자 열기
+        folder_path = filedialog.askdirectory()
+        if folder_path:
+            # 엔트리에 선택한 경로 표시
+            self.entry.delete(0, tk.END)
+            self.entry.insert(0, folder_path)
+            # settings.ini 파일에 경로 저장
+            self.configure_phaser(folder_path)
+            
+            
+    def configure_phaser_read(self):
+        config = ConfigParser()
         
+        if os.path.exists(self.config_file):
+            config.read(self.config_file, encoding='utf-8')
+            if config.has_section('Phaser') and 'FolderPath' in config['Phaser']:
+                folder_path = config['Phaser']['FolderPath']
+                self.entry.insert(0,folder_path)
+                
+                    
         
+    def configure_phaser(self, folder_path):
 
-a = KPopGroup('김현민',10)
 
-# a.introduce()
-print(a)
+        config = ConfigParser()
+        config_file = 'settings.ini'
+
+        # 기존 설정 파일이 있으면 읽어오기
+        if os.path.exists(config_file):
+            config.read(config_file,encoding="utf-8")
+
+        # 'Phaser' 섹션이 있으면 업데이트, 없으면 새로 추가
+        if not config.has_section('Phaser'):
+            config.add_section('Phaser')
+
+        # 'FolderPath' 항목 갱신
+        config['Phaser']['FolderPath'] = folder_path
+        
+        # 갱신된 설정을 settings.ini 파일에 저장
+        with open(config_file, 'w', encoding="utf-8") as configfile:
+            config.write(configfile)
+            
+            
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Settings App")
+    a = tk.Frame(root)
+    a.grid(row=0,column=0)
+    app = SettingsApp(a)
+    app.grid(row=0,column=0)
+    app.mainloop()

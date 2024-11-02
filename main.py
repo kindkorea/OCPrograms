@@ -10,7 +10,7 @@ import gui_calculator
 import gui_Utilities
 import gui_pdf2jpg
 import win32clipboard
-
+import settingFille
 
 
         
@@ -22,14 +22,15 @@ class ControlFrame():
         self.topMenuFrame = Frame(self.root)
         self.contentFaxFrame = Frame(self.root)
         self.contentMarginCalc = Frame(self.root)
+        self.settings = Frame(self.root)
         
         gui_Utilities.Utilities(self.contentFaxFrame)
         gui_calculator.Calculators(self.contentMarginCalc)
-        
+        settingFille.SettingsApp(self.settings)
         self.menu_list = {
             0 : ['컨버터 및 팩스'],
             1 : ['마진 계산기'],
-            # 2 : ['테스트']
+            2 : ['설정']
         }
         self.NUMBER_TITLE = 0
         self.NUMBER_FRAME = 1
@@ -48,6 +49,7 @@ class ControlFrame():
 
         self.menu_list[0].append(self.contentFaxFrame)
         self.menu_list[1].append(self.contentMarginCalc)
+        self.menu_list[2].append(self.settings)
         
         self.current_frame = self.menu_list[0][self.NUMBER_FRAME]
         self.change_frame(0)
