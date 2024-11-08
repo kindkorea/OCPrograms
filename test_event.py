@@ -3,18 +3,21 @@ from tkinter import filedialog
 from configparser import ConfigParser
 import os
 class SettingsApp(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master , config_file, section, key):
         super().__init__(master)
         self.master = master
         # self.grid()
-        self.config_file = 'settings.int'
+        self.config_file = config_file
+        self.config_section = section
+        self.config_key = key
+        
         self.create_widgets()
         self.configure_phaser_read()
     
     def create_widgets(self):
         # Label
-        self.label = tk.Label(self, text="Folder Path:")
-        self.label.grid(row=0, column=0)
+        self.label = tk.Label(self,width=15, text= f'{self.config_key} : ')
+        self.label.grid(row=0, column=0 ,sticky='we')
         
         # Entry
         self.entry = tk.Entry(self, width=50)
@@ -37,34 +40,32 @@ class SettingsApp(tk.Frame):
             
     def configure_phaser_read(self):
         config = ConfigParser()
-        
         if os.path.exists(self.config_file):
+            print(self.config_file)
             config.read(self.config_file, encoding='utf-8')
-            if config.has_section('Phaser') and 'FolderPath' in config['Phaser']:
-                folder_path = config['Phaser']['FolderPath']
+            if config.has_section(self.config_section) and self.config_key in config[self.config_section]:
+                folder_path = config[self.config_section][self.config_key]
                 self.entry.insert(0,folder_path)
                 
                     
         
     def configure_phaser(self, folder_path):
-
-
         config = ConfigParser()
-        config_file = 'settings.ini'
+        # config_file = 'settings.ini'
 
         # 기존 설정 파일이 있으면 읽어오기
-        if os.path.exists(config_file):
-            config.read(config_file,encoding="utf-8")
+        if os.path.exists(self.config_file):
+            config.read(self.config_file,encoding="utf-8")
 
         # 'Phaser' 섹션이 있으면 업데이트, 없으면 새로 추가
-        if not config.has_section('Phaser'):
-            config.add_section('Phaser')
+        if not config.has_section(self.config_section):
+            config.add_section(self.config_section)
 
         # 'FolderPath' 항목 갱신
-        config['Phaser']['FolderPath'] = folder_path
+        config[self.config_section][self.config_key] = folder_path
         
         # 갱신된 설정을 settings.ini 파일에 저장
-        with open(config_file, 'w', encoding="utf-8") as configfile:
+        with open(self.config_file, 'w', encoding="utf-8") as configfile:
             config.write(configfile)
             
             
@@ -73,6 +74,11 @@ if __name__ == "__main__":
     root.title("Settings App")
     a = tk.Frame(root)
     a.grid(row=0,column=0)
-    app = SettingsApp(a)
-    app.grid(row=0,column=0)
-    app.mainloop()
+    toJpg = SettingsApp(a,'./settings.ini', 'pdf parser','toJpg')
+    changingName = SettingsApp(a,'./settings.ini', 'pdf parser','changingName')
+    # app = SettingsApp(a,'./settings.ini', 'pdf parser','toJpg')
+    
+    
+    toJpg.grid(row=0,column=0)
+    changingName.grid(row=1,column=0)
+    root.mainloop()

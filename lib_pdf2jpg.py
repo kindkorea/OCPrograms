@@ -3,20 +3,29 @@ import PIL
 from PIL import Image
 import win32clipboard
 import os
+from settingFille import ConfigureIni
+
 
 from pdf2image import convert_from_path
 
 import glob 
+import time
+from datetime import datetime
 
 class P2J():
-    def __init__(self, src_path, dst_path):
+    def __init__(self):
 
-        self.PDF_SRC_PATH = src_path
-        self.PDF_TO_JPG_DST_PATH = dst_path
+        self.PDF_SRC_PATH = ConfigureIni.read('pdf parser','from_pdf_folder')
+        self.PDF_TO_JPG_DST_PATH = ConfigureIni.read('pdf parser','save_folder')
         self.coverted_jpg_count = 0
         self.converted_jpg_filelist = []
-        # self.bnt_list_cb = []
+        self.selected_pdf = ''
 
+    @property
+    def pdf(self):
+        return self.selected_pdf
+    
+    
     def send_to_clipboard(self,index):
         
         selected_file = self.converted_jpg_filelist[index]
@@ -37,8 +46,8 @@ class P2J():
     def _open_folder(self):
         os.startfile(self.PDF_TO_JPG_DST_PATH)
     
-    def _most_recent_pdf( self):
-        
+    def _most_recent_pdf2( self):
+        current_time = time.time()
         try :
             load_files = glob.glob(self.PDF_SRC_PATH+'/*.*')
             
@@ -47,10 +56,37 @@ class P2J():
             pdf_files_with_time =[]
             # print(pdf_file_list)
             for pdf_file in pdf_file_list:
-                pdf_files_with_time.append((pdf_file,os.path.getctime(pdf_file)))
-            return max(pdf_files_with_time,key=lambda x: x[1])[0]
+                pdf_files_with_time.append((pdf_file, os.path.getctime(pdf_file)))
+            
+            lately_pdf = max(pdf_files_with_time,key=lambda x: x[1])[0]
+            modification_time = os.path.getmtime(lately_pdf)
+            # print(f'{current_time - modification_time=}')
+            if current_time - modification_time < 60000 :
+                self.selected_pdf = lately_pdf + "  " + datetime.fromtimestamp(modification_time).strftime('%H:%M:%S')
+                return lately_pdf
+            else : 
+                return False
         except : 
             print("_most_recent_pdf err was ocurred")
+            
+    def _most_recent_pdf(self):
+        current_time = time.time()
+        try :
+            load_files = glob.glob(self.PDF_SRC_PATH+'/*.*')
+            pdf_file_list = [file for file in load_files if file.endswith('.pdf' and '.PDF')] #pdf 파일 검출
+        
+            if pdf_file_list:
+                latest_file = max(pdf_file_list, key=os.path.getmtime)
+                modification_time = os.path.getmtime(latest_file)
+                if current_time - modification_time < 1800 :  #30분 이내 파이말 유효함
+                    self.selected_pdf = latest_file + "  " + datetime.fromtimestamp(modification_time).strftime('%H:%M:%S')
+                    print(self.selected_pdf)
+                    return latest_file
+        
+            return False
+        except : 
+            print("_most_recent_pdf err was ocurred")   
+            
     
     def _cmd_createDirectory(self,directory):
         try:
@@ -73,10 +109,11 @@ class P2J():
                 o_filename = f"{file_path}/{change_filename}#{str(i)}.jpg" 
                 page.save(o_filename, "JPEG")
                 output_filelist.append(o_filename)
-
+            os.remove(src_file)
             return  output_filelist
+        
         except Exception as e:
-            print(f"__pdf_to_jpg : {e}")
+            print(f"__pdf_to_jpg : {e} src ={src_file}")
 
    
     def _cmd_re_name(self,src_file, dest_path, change_filename):
@@ -88,23 +125,18 @@ class P2J():
         
         self._cmd_createDirectory(file_path)
         os.startfile(file_path)
+        os.rename(src_file , rename)
         
-        if os.path.exists(rename):
-            print(f"{rename} is exist")
-        else :    
-            os.rename(src_file , rename)
-            return rename    
-
 
 
     def cmd_pdf_to_jpg(self,filename):
 
-        pdfFile = self._most_recent_pdf()
-
-        if not pdfFile :
-            print('no pdf file')
+        src_pdf_file = self._most_recent_pdf()
+        if src_pdf_file :
+            self.converted_jpg_filelist = self._pdf_to_jpg(src_pdf_file , self.PDF_TO_JPG_DST_PATH,  filename)
+            return self.converted_jpg_filelist
         else :
-            self.converted_jpg_filelist = self._pdf_to_jpg(pdfFile , self.PDF_TO_JPG_DST_PATH,  filename)
+            return False
         
     def get_converted_count(self):
         if self.converted_jpg_filelist :
@@ -115,7 +147,12 @@ class P2J():
     def cmd_rename(self, filename):
       
         pdfFile = self._most_recent_pdf()     
-        self._cmd_re_name(pdfFile, self.PDF_TO_JPG_DST_PATH, filename)
-       
+        if pdfFile :
+            self._cmd_re_name(pdfFile, self.PDF_TO_JPG_DST_PATH, filename)
+            return pdfFile
+            # pass
+        else : 
+            False
+            
 
         

@@ -7,7 +7,7 @@ import os
 import datetime
 from io import BytesIO
 import win32clipboard
-
+import threading
 
 class Pdf2jpg():
     def __init__(self, containerFrame):
@@ -20,16 +20,8 @@ class Pdf2jpg():
         
         self.cb_btns = 10
         self.cb_btn_list = []
-        
-        PDF_SRC_DIR_PATH = 'C:/Users/kindk/Downloads'
-        PDF_TO_JPG_DEST_DIR_PATH = 'C:/Users/kindk/bills'
-
-        self.P2J = lib_pdf2jpg.P2J(PDF_SRC_DIR_PATH,PDF_TO_JPG_DEST_DIR_PATH)
-        # self.title_first  = StringVar()
-        
+        self.P2J = lib_pdf2jpg.P2J()
         self._create_widgets()
-        
-        
         
     def _create_widgets(self):
         # Find what
@@ -53,14 +45,28 @@ class Pdf2jpg():
         Button(self.top_innerframe, text='이름 변환', command=self._btn_rename).grid(column=6, row=0, padx= 5, pady= 5, sticky=tk.E)
         Button(self.top_innerframe, text='폴더 열기', command=self.P2J._open_folder).grid(column=7, row=0, padx= 5, pady= 5, sticky=tk.E)
         
+        self.selected_file = Label(self.top_innerframe,text='........',justify="left")
+        self.selected_file.grid(row=1,column=0, columnspan=8)
+        
         self.btn_f = Frame(self.top_frame)
         self.btn_f.grid(row=1,column=0)
+        
         for i in range(self.cb_btns):
             self.cb_btn_list.append(self._make_btn(self.btn_f, 1, i , 5, f'CB_{i+1}'))
 
         for widget in self.container.winfo_children():
             widget.grid(padx=1, pady=3)
             
+            
+            
+    def _stop_threading_func(self):
+        self.selected_file.config(text = "변환할 파일")
+        
+    def _label_on_selected_pdf(self,pdf):
+        self.selected_file.config(text=pdf)
+        timer = threading.Timer(10, self._stop_threading_func)
+        timer.start()
+        
     def _popup_asking_filename(self):
         # the input dialog
         USER_INP = simpledialog.askstring(title="이름",
@@ -75,7 +81,6 @@ class Pdf2jpg():
         return e
     
     def _btn_cell_data(self,index):
-        # print(f'__btn_cell_data = {index}')
         if index < self.P2J.get_converted_count():
             self.P2J.send_to_clipboard( index ) 
             # change button color 
@@ -84,28 +89,37 @@ class Pdf2jpg():
         
     def _btn_color(self, index , state):
         self.cb_btn_list[index].configure(bg=state)
-        # print(self.cb_btn_list[index])
 
     def _get_filename(self):
         
         title_sec = self.entry_name_second.get()
         if title_sec == '' or title_sec == None:
             title_sec = self._popup_asking_filename()
-            # title_sec =  datetime.datetime.now().strftime('%Hh%Mm')
-        return  self.entry_name_first.get() + '_'+ title_sec
+            if title_sec != '':
+                return False
+                
+        return  self.entry_name_first.get() +'_'+ title_sec
     
     def _read_toCB(self, converted_count):
         
         for idx in range(self.cb_btns):
             self._btn_color(idx, '#f0f0f0' if idx >=  converted_count else 'red')
-        
+    
     def _btn_pdf2jpg(self):
-        self.P2J.cmd_pdf_to_jpg(self._get_filename())
-        self._read_toCB(self.P2J.get_converted_count())
-        
+        output_file_List = self.P2J.cmd_pdf_to_jpg(self._get_filename())
+        if  output_file_List :
+            self._read_toCB(len(output_file_List))
+            self._label_on_selected_pdf(self.P2J.pdf)
+        else : 
+            self._label_on_selected_pdf('변환할 PDF 없습니다.')    
+            
+            
     def _btn_rename(self):    
-        self.P2J.cmd_rename(self._get_filename())
-        self.entry_name_second.delete(END)
+        if  self.P2J.cmd_rename(self._get_filename()):
+            self.entry_name_second.delete(END)
+            self._label_on_selected_pdf(self.P2J.pdf)
+        else : 
+            self._label_on_selected_pdf('변환할 PDF 없습니다.')    
 
     def _clear_cb(self):
         self._read_toCB(0)
@@ -115,9 +129,7 @@ class App(Tk):
         super().__init__()
         self.title('Replace')
         self.geometry('500x500+2000+100')
-        # self.resizable(0, 0)
-        # windows only (remove the minimize/maximize button)
-        # self.attributes('-toolwindow', True)
+      
 
         # layout on the root window
         self.columnconfigure(0, weight=1)
@@ -126,13 +138,10 @@ class App(Tk):
         self.__create_widgets()
 
     def __create_widgets(self):
-        # create the input frame
-        # input_frame = gui_pdf2jpg.Pdf2jpg(self,8)
-        # input_frame.grid(column=0, row=0)
-        fax_receive = Pdf2jpg(self)
-        fax_receive.grid(column=0, row=1)
-        # # create the button frame
-        # button_frame = gui_pdf2jpg.Cb_Btn_frame(self,8)
+      
+        # fax_receive = Pdf2jpg(self)
+        Pdf2jpg(self)
+        # fax_receive.grid(column=0, row=1)
 
         
 if __name__ == "__main__":

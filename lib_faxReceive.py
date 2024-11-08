@@ -5,32 +5,28 @@ import sys
 import subprocess
 import shutil
 
+from settingFille import ConfigureIni
+
 class FaxReceive():
-    def __init__(self,file_path):
+    def __init__(self):
         
         self.EXTENTION_VIEWER = 'c:/Users/kindk/AppData/Local/Imagine/Imagine64.exe'
-        self.FAX_DIRECTOR_PATH = file_path
-        # self.samefile_index = 0
+        self.FAX_DIRECTOR_PATH = ConfigureIni.read('fax','fax_save_folder')
+        
     def get_faxfiles(self):
         return self._get_sorted_faxfiles(self._get_files_inDirectory())     
     
     
     def rename_to_company(self, src_file ,dst_name):
         
-        # samefile_index =0
         src_path_file = os.path.join(self.FAX_DIRECTOR_PATH,src_file)
         if os.path.isfile(src_path_file):
             try : 
-                
                 file_stat = os.stat(src_path_file)
                 created_timestamp = file_stat.st_ctime
                 file_ctime = time.strftime('%Y-%m-%d', time.localtime(created_timestamp))
 
-
                 file_ext = os.path.splitext(src_file)[1] 
-                # file_ctime = os.path.getctime(src_path_file)
-                # file_ctime = time.gmtime(file_ctime)
-                # file_ctime = time.strftime("%Y-%m-%d",file_ctime )
                 dst_file_name = os.path.join(self.FAX_DIRECTOR_PATH, f'{dst_name}_{file_ctime}{file_ext}')
                 
                 for i in range(1,20):
