@@ -5,16 +5,16 @@ import sys
 import subprocess
 import shutil
 
-from settingFille import ConfigureIni
 
+        
 class FaxReceive():
-    def __init__(self):
+    def __init__(self, fax_folder_path):
         
         self.EXTENTION_VIEWER = 'c:/Users/kindk/AppData/Local/Imagine/Imagine64.exe'
-        self.FAX_DIRECTOR_PATH = ConfigureIni.read('fax','fax_save_folder')
+        self.FAX_DIRECTOR_PATH = fax_folder_path
         
-    def get_faxfiles(self):
-        return self._get_sorted_faxfiles(self._get_files_inDirectory())     
+    def get_file_from_folder(self, folder_path):
+        return self._get_sorted_faxfiles(self._get_files_inDirectory(folder_path))     
     
     
     def rename_to_company(self, src_file ,dst_name):
@@ -79,20 +79,21 @@ class FaxReceive():
         
         except FileNotFoundError :
             print(f'Error: The file {src_file} does not exist.')
-        
-    def _get_files_inDirectory(self):
+    
+    def _get_files_inDirectory(self,file_path):
         try : 
-            os.path.isdir(self.FAX_DIRECTOR_PATH)
-            return os.listdir(self.FAX_DIRECTOR_PATH)
-            
-        except FileNotFoundError:
+                # 폴더 내 모든 파일의 경로 가져오기
+            files = [os.path.join(file_path, file) for file in os.listdir(file_path)]
+            # 파일만 필터링하고 수정 시간 기준으로 정렬
+            files = [file for file in files if os.path.isfile(file)]
+            files.sort(key=os.path.getmtime )  # 수정 시간 기준으로 정렬
+            return files
+        except :
             print(f"Error: The directory '{self.FAX_DIRECTOR_PATH}' does not exist.")
             
     def _get_sorted_faxfiles(self,file_list):
         checked_list = []
         unchecked_list = [] 
-        
-        file_list.sort(key=lambda x: os.path.getmtime(os.path.join(self.FAX_DIRECTOR_PATH, x)))
 
         for f in file_list:
             if f[1] == 'v':

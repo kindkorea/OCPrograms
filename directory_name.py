@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.messagebox as msgbox
 from tkinter import * # __all__
-import lib_movefile
+import lib_movefile_________deleting
 
 # import directory_name
 
@@ -69,7 +69,7 @@ class FileMove:
         self.popup_window.geometry(f'200x300+{self.master_position_X+300}+{self.master_position_Y+300}')
         # self.popup_window.wm_attributes("-topmost", 1)
         
-        self.move_file = lib_movefile.MoveFile( src_path , src_files, dst_dir)
+        self.move_file = lib_movefile_________deleting.MoveFile( src_path , src_files, dst_dir)
         
         self.valid_datas, self.invalid_datas = self.move_file.get_fileList()
 

@@ -10,6 +10,9 @@ from queue import Queue
 from tkinter import messagebox
 import directory_name
 
+from settingFille import ConfigureIni
+
+
 
 class CustomHandler(FileSystemEventHandler):
     def __init__(self, app):
@@ -43,6 +46,10 @@ class CompanyButtonApp:
             "크나우프",
             "태진목재",
             "사업자",
+            "기타",
+            "경비_주유소",
+            "경비_경동화물",
+            "경비_대신화물"
             
         ]
         
@@ -91,7 +98,7 @@ class GUI_FaxReceive():
         
         self.fax_frame.grid(row=0,column=0, padx=10 ,pady = 10)
         
-        self.FAX_R = lib_faxReceive.FaxReceive()
+        self.FAX_R = lib_faxReceive.FaxReceive(ConfigureIni.read('fax','fax_save_folder'))
         self.file_listbox = Listbox(self.fax_frame, width=50,  height=25, selectmode=EXTENDED, highlightthickness=1) 
         self.file_listbox.grid(row=0,column=0,rowspan=6) 
         
@@ -119,8 +126,16 @@ class GUI_FaxReceive():
       
         self.frameBtnCompanies = Frame(self.container)
         self.frameBtnCompanies.grid(row=2,column=0)
+        self.radio_var = StringVar()
+        self.radio_var.set("comp_name")  # 기본값 설정
+
+        # 라디오 버튼 생성
+        self.radio_btn_name = Radiobutton(self.frame_changingName, text="팩스 이름", variable=self.radio_var, value="comp_name")
+        self.radio_btn_open_folder = Radiobutton(self.frame_changingName, text="팩스 찾기", variable=self.radio_var, value="open_folder")
+        self.radio_btn_name.grid(row=0 , column=1)
+        self.radio_btn_open_folder.grid(row=0 , column=2)
         
-        CompanyButtonApp(self.frameBtnCompanies  , self._handlr_company_rename)
+        CompanyButtonApp(self.frameBtnCompanies  , self._callback_company_name)
         
         
         self.to_change_company_name = StringVar()
@@ -141,7 +156,7 @@ class GUI_FaxReceive():
         
     def _reset_listbox(self):
         self.file_listbox.delete(0,END)
-        unchecked, checked = self.FAX_R.get_faxfiles()
+        unchecked, checked = self.FAX_R.get_file_from_folder(ConfigureIni.read('fax','fax_save_folder'))
         self._set_list_to_listbox(checked, True)
         self._set_list_to_listbox(unchecked, False)
         
@@ -202,15 +217,35 @@ class GUI_FaxReceive():
              self._rename(nameEntry)
         else : 
             pass
-         
-    def _handlr_company_rename(self, dst_name):  #하단의 상호명 버튼
-        # print(dst_name)
+    
+    def _rename_faxFile(self, dst_name):
         nameEntry = self.entry_changingName.get()
-
         if nameEntry != '' : 
             self._rename(dst_name + '_' + nameEntry )
         else : 
             self._rename(dst_name)
+            
+            
+    def _open_faxFile(self,dst_name):
+        import lib_move_file
+        a = lib_move_file.MoveFaxFile()
+        
+        # filename = dst_name
+        file_path = a.search_folder_by_keyword(dst_name)
+        if file_path:
+            file_list = self.FAX_R.get_file_from_folder(file_path)
+            self._set_list_to_listbox(file_list,True)
+            # print(f"open {file_list}")
+        
+    def _callback_company_name(self, dst_name):  #하단의 상호명 버튼
+        selected_value = self.radio_var.get()
+        if selected_value == 'comp_name' :
+            self._rename_faxFile(dst_name)
+            
+        elif selected_value == 'open_folder' :
+            self._open_faxFile(dst_name)
+        # print(dst_name)
+        
     
         
     def _handlr_bind_rename(self, e): #entry bind handler
@@ -227,7 +262,7 @@ class GUI_FaxReceive():
         if dst_name != '' and selected_files : 
             for f_name in selected_files:
                 self.FAX_R.rename_to_company(f_name , dst_name)        
-                   
+                
             self._reset_listbox()
             self.entry_changingName.delete(0,END)  
         else :
@@ -263,11 +298,9 @@ class GUI_FaxReceive():
             print('self.selected_file_from_Listbox is empty')
 
     def _handler_btn_file_move(self):     
-        # print("__handler_btn_file_move")
-        selected_file = self._get_from_file_listbox()
-        if  selected_file : 
-            for src_name in selected_file:
-                directory_name.FileMove(self , self.selected_file_from_Listbox ,self.FAX_DIRECTOR_PATH, self.FAX_DIRECTOR_PATH)
+        import lib_move_file
+        a = lib_move_file.MoveFaxFile()
+        a.doMove()
         
         
     def _handler_btn_file_move_all(self):     
