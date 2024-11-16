@@ -1,11 +1,15 @@
 import os
 import datetime
-
+import subprocess
+from settingFille import ConfigureIni
+import shutil
 class FaxFileControl():
     
-    def __init__(self, fax_root_folder):
-        self.fax_root_folder = fax_root_folder
-
+    def __init__(self):
+        self.extension_viewer = ConfigureIni.read('fax','extension_viewer')
+        self.fax_trash_bin_folder = ConfigureIni.read('fax','fax_trash_bin_folder')
+        # print(self.extension_viewer)
+        
     def _get_file_path_in_folder(self, file_path):
         try:
             # 주어진 디렉토리에서 파일만 가져옵니다.
@@ -37,14 +41,34 @@ class FaxFileControl():
         list_non_v = []
 
         for item in file_list:
-            if item[0:2] == '[v]':
+            if item[0:3] == '[v]':
                 list_v.append(item)
             else:
                 list_non_v.append(item)
-        
+        # print(f'{list_v=}')
+        # print(f'{list_non_v=}')
         return list_v, list_non_v
     
-    
+    def run_with_viewer(self,file_path, src_file):
+        """
+        src_file 을 확장 jpg뷰어로 실행함
+        Args:
+            file_path
+            src_file
+        
+        Returns:
+        
+        """
+        try : 
+            file_path = os.path.join(file_path,src_file)
+            
+            cmd = f'{self.extension_viewer} {file_path}'
+            subprocess.Popen(cmd)
+        
+        except FileNotFoundError :
+            print(f'Error: The file {src_file} does not exist.')
+            
+            
     def checking_v_file(self, filepath, src_filename):
         """
         src_filename에 [v] 확인 도장을 찍거나 삭제함
@@ -86,19 +110,28 @@ class FaxFileControl():
         
         Returns:
         """
-        
-        try:
-            # 삭제할 파일의 전체 경로를 생성합니다.
-            file_path = os.path.join(filepath, src_filename)
+        try :
+            src_file_path = os.path.join(filepath,src_filename)
+            if os.path.isfile(src_file_path):
+                try : 
+                    # send2trash.send2trash(src_file_path)
+                    shutil.move(src_file_path, self.fax_trash_bin_folder)
+                except Exception as err :
+                    print(f'send2trash occur exception {err}')
+        except FileNotFoundError :
+            print(f'Error: The file {src_file_path} does not exist.')
+        # try:
+        #     # 삭제할 파일의 전체 경로를 생성합니다.
+        #     file_path = os.path.join(filepath, src_filename)
 
-            # 파일이 존재하는지 확인하고 삭제합니다.
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-                print(f"파일 '{src_filename}'이 성공적으로 삭제되었습니다.")
-            else:
-                print(f"파일 '{src_filename}'을 찾을 수 없습니다.")
-        except Exception as e:
-            print(f"파일 삭제 중 에러가 발생했습니다: {e}")
+        #     # 파일이 존재하는지 확인하고 삭제합니다.
+        #     if os.path.isfile(file_path):
+        #         os.remove(file_path)
+        #         print(f"파일 '{src_filename}'이 성공적으로 삭제되었습니다.")
+        #     else:
+        #         print(f"파일 '{src_filename}'을 찾을 수 없습니다.")
+        # except Exception as e:
+        #     print(f"파일 삭제 중 에러가 발생했습니다: {e}")
 
     
     def rename_fax_file_with_date(self, filepath, src_filename , dst_filename ):
@@ -125,9 +158,16 @@ class FaxFileControl():
             creation_date = datetime.datetime.fromtimestamp(creation_time).strftime('%Y-%m-%d')
             _, file_extension = os.path.splitext(src_filename)
             # 새로운 파일명 생성
-            new_filename = f"{dst_filename}_{creation_date}{file_extension}"
-            new_full_path = os.path.join(filepath, new_filename)
-
+            new_filename = f"{dst_filename}_{creation_date}"
+            new_full_path = ''
+            new_full_filename = f"{dst_filename}_{creation_date}{file_extension}"
+            new_full_path = os.path.join(filepath, new_full_filename)
+            count = 1
+            while os.path.exists(new_full_path):
+                new_full_filename = f'{new_filename}#{count}{file_extension}'
+                new_full_path = os.path.join(filepath, new_full_filename)
+                count += 1
+           
             # 파일 이름을 변경합니다.
             os.rename(src_full_path, new_full_path)
 
@@ -145,16 +185,16 @@ class FaxFileControl():
     def get_sorted_filename(self, folder_path):
         return self._get_file_name(self._get_file_path_in_folder(folder_path))
     
-    def get_fax_file(self): 
+    def get_fax_file(self, folder_path): 
         """
         팩스 수신 폴더를 GUI단 데이터 리턴함
 
         Args:
             
         Returns:
-            [v] 파일명 앞에 있는것, 없는 것 두가지 리스트를 리턴함
+            [v]유무 v_list, non_v_list 두가지 리스트를 리턴함
         """
-        return self._separate_v_file(self.get_sorted_filename(self.fax_root_folder))
+        return self._separate_v_file(self.get_sorted_filename(folder_path))
         
     def get_sorted_filename(self, folder_path):
         """
@@ -171,5 +211,5 @@ class FaxFileControl():
 
     
 if __name__ == '__main__':
-    a = FaxFileControl('C:/Users/kindk/OneDrive/OCWOOD_OFFICE/FAX_received')
+    a = FaxFileControl()
     

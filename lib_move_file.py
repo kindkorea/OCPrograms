@@ -53,6 +53,15 @@ class MoveFaxFile():
         return None
 
     def _get_key_from_filename(self, filename):
+        """ 파일명에서 키값을 추출함 
+            [v] 에서 첫 _ 까지의 텍스트를 추출
+            
+            Args:
+                filename 파일명
+            
+            Returns:
+                seek_key 키값 < 이후 이값으로 해당 폴더를 검색함
+        """
         if filename[0:3] == '[v]':
             # 첫 번째 '_' 전까지의 부분을 출력
             name_part = filename.split('_')[0]

@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 import configparser
+import json
 
 
 import tkinter as tk
@@ -8,6 +9,60 @@ from tkinter import filedialog
 from configparser import ConfigParser
 import os
 
+import json
+
+
+class JsonReader():
+    @staticmethod
+    def read(json_file_path):
+        with open(json_file_path, 'r', encoding='utf-8') as json_file :
+            return json.load(json_file)
+    @staticmethod
+    def write(json_file_path, data):
+        with open(json_file_path, 'w', encoding='utf-8') as json_file:
+            json.dump(data, json_file, ensure_ascii=False ,indent=4)
+            
+
+    @staticmethod
+    def is_data(json_file_path, key, data):
+        temp_data = JsonReader.read(json_file_path)
+        if key in temp_data :
+            if  data in temp_data[key] :
+                return temp_data
+        return False
+            
+        
+    @staticmethod
+    def is_key(json_file_path, key):
+        temp_data = JsonReader.read(json_file_path)
+        if key in temp_data:
+            return temp_data
+        else :
+            return False  
+    
+    @staticmethod
+    def move(json_file_path , from_key, to_key, move_data):
+        temp_data = JsonReader.read(json_file_path)
+        if from_key in temp_data and move_data in temp_data[from_key] :
+            # print(f'there is {move_data}')
+            temp_data[to_key].append(move_data)
+            temp_data[from_key].remove(move_data)
+            JsonReader.write(json_file_path,temp_data)
+
+    @staticmethod
+    def add(json_file_path , key, data):
+        temp_data = JsonReader.read(json_file_path)
+        try :
+            if not data in temp_data[key] :
+                temp_data[key].append(data)
+                JsonReader.write(json_file_path,temp_data)
+            else :
+                print(f"{data} is already Existed")
+        except : 
+            pass
+
+            
+            
 class ConfigureIni():
     @staticmethod
     def read(config_section, config_key):
@@ -20,9 +75,8 @@ class ConfigureIni():
                 return config[config_section][config_key]
 
     @staticmethod
-    def write(config_section, config_key ,folder_path):
+    def write(config_section, config_key ,value):
         config_file = 'settings.ini'
-        
         config = ConfigParser()
         # config_file = 'settings.ini'
 
@@ -35,12 +89,18 @@ class ConfigureIni():
             config.add_section(config_section)
 
         # 'FolderPath' 항목 갱신
-        config[config_section][config_key] = folder_path
+        config[config_section][config_key] = value
         
         # 갱신된 설정을 settings.ini 파일에 저장
         with open(config_file, 'w', encoding="utf-8") as config_file:
                  config.write(config_file)
-
+                 
+    @staticmethod         
+    def read_and_return_list(config_section, config_key):
+        read_file = ConfigureIni.read(config_section,config_key)
+        if read_file : 
+            # config.read(config_file, encoding='utf-8')
+            return json.loads(read_file)
 
 
 
