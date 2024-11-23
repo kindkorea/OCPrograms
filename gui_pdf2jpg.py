@@ -2,11 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import * # __all__
 import lib_pdf2jpg
-from tkinter import simpledialog
+# from tkinter import simpledialog
 import os
 import datetime
-from io import BytesIO
-import win32clipboard
+# from io import BytesIO
+# import win32clipboard
 import threading
 
 class Pdf2jpg():
@@ -26,7 +26,7 @@ class Pdf2jpg():
     def _create_widgets(self):
         # Find what
 
-        self.top_frame = LabelFrame(self.container,text='PDF파일을 이미지로 변환함 ')
+        self.top_frame = LabelFrame(self.container,text='PDF파일을 이미지로 변환 ')
         self.top_frame.grid(row=0, column=0 , padx=10 ,sticky='we')
         
         self.top_innerframe = Frame(self.top_frame)
@@ -68,11 +68,12 @@ class Pdf2jpg():
         timer.start()
         
     def _popup_asking_filename(self):
+        pass
         # the input dialog
-        USER_INP = simpledialog.askstring(title="이름",
-                                    prompt="이름을 입력하시오?")
+        # USER_INP = simpledialog.askstring(title="이름",
+        #                             prompt="이름을 입력하시오?")
          # check it out
-        return USER_INP
+        # return USER_INP
     
     def _make_btn(self,frame, row, column, width, text):
         e = Button(frame, width=width , text = text , command= lambda : self._btn_cell_data(column))
@@ -111,7 +112,7 @@ class Pdf2jpg():
             self._read_toCB(len(output_file_List))
             self._label_on_selected_pdf(self.P2J.pdf)
         else : 
-            self._label_on_selected_pdf('변환할 PDF 없습니다.')    
+            self._label_on_selected_pdf('변환할 이름을 입력해주세요.')    
             
             
     def _btn_rename(self):    

@@ -3,7 +3,7 @@ from tkinter import ttk
 import lib_calc_method as mcal
 from tkinter import messagebox 
 import sympy
-
+import pyperclip
 
 
         
@@ -356,6 +356,8 @@ class MarginCalculator():  # 수정중인 코드
         # 추가 버튼 생성
         add_button = ttk.Button(self.frameMarginCalc,width=7, text="Add Row", command=self.create_row)
         add_button.grid(row=0, column=0)
+        
+        ttk.Button(self.frameMarginCalc ,width=3, text = 'P', command=self._handler_btn_paste_from_excel).grid(row=0, column = 8)
         for _ in range(5):
             self.create_row()  # 초기에 한 행 생성
             # self.DataSet.addInitList()
@@ -413,8 +415,32 @@ class MarginCalculator():  # 수정중인 코드
             b = self.entry_widgets[row][i].get()
             thisDataList.append(int(self.rm_comma(b)) if b  != '' else 0)
         
-        return thisDataList         
+        return thisDataList   
+    
+
+    def _set_data(self, widget , data):
+        widget.delete(0,tk.END)
+        widget.insert(tk.END ,data)
+                    
+    def _show_clipboard_data(self):
+        # 클립보드에서 데이터를 가져옴
+        clipboard_data = pyperclip.paste()
+        # 행과 열로 데이터를 분리
+        rows = clipboard_data.split("\n")
+        # datas = []
+        while len(self.entry_widgets) <= len(rows):
+            self.create_row()
             
+        for i, row in enumerate(rows):
+            cells = row.split("\t")
+            for j, cell in enumerate(cells):
+                if cell.strip():  # 빈 셀 무시
+                    print(cell)
+                    self._set_data(self.entry_widgets[i][j],cell)      
+                    
+    def _handler_btn_paste_from_excel(self):
+        self._show_clipboard_data()
+                
     def _handler_key_press(self,event,row,col):
             
         if not self.type_on and event.char.isdigit():

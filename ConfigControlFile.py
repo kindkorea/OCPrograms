@@ -50,13 +50,15 @@ class JsonReader():
             JsonReader.write(json_file_path,temp_data)
 
     @staticmethod
-    def add(json_file_path , key, data):
+    def update(json_file_path , key, data ):
         temp_data = JsonReader.read(json_file_path)
         try :
-            if not data in temp_data[key] :
-                temp_data[key].append(data)
-                JsonReader.write(json_file_path,temp_data)
+            if data in temp_data[key] :
+               temp_data[key].remove(data)
             else :
+                temp_data[key].append(data)
+                JsonReader.write(json_file_path,temp_data) 
+                
                 print(f"{data} is already Existed")
         except : 
             pass
@@ -104,34 +106,74 @@ class ConfigureIni():
 
 
 
+# class SettingConfig2(tk.Frame):
+#     def __init__(self, master , section, key):
+#         super().__init__(master)
+#         self.master = master
+#         # self.grid()
+#         # self.config_file = config_file
+#         self.config_section = section
+#         self.config_key = key
+        
+#         self.create_widgets()
+#         self.configure_phaser_read()
+    
+#     def create_widgets(self):
+#         # Label
+#         self.label = tk.Label(self,width=15, text= f'{self.config_key} : ')
+#         self.label.grid(row=0, column=0 ,sticky='we')
+#         # Entry
+#         self.entry = tk.Entry(self, width=50)
+#         self.entry.grid(row=0, column=1)
+#         # Button
+#         self.button = tk.Button(self, text="Browse", command=self.save_folder_path)
+#         self.button.grid(row=0, column=2)
+#     def save_folder_path(self):
+#         # 폴더 선택 대화상자 열기
+#         folder_path = filedialog.askdirectory()
+#         if folder_path:
+#             # 엔트리에 선택한 경로 표시
+#             self.entry.delete(0, tk.END)
+#             self.entry.insert(0, folder_path)
+#             # settings.ini 파일에 경로 저장
+#             ConfigureIni.write(self.config_section, self.config_key, folder_path)
+#     def configure_phaser_read(self):
+#         folder_path = ConfigureIni.read(self.config_section, self.config_key)
+#         if folder_path:
+#             self.entry.insert(0,folder_path)
+                
 class SettingConfig(tk.Frame):
-    def __init__(self, master , section, key):
+    def __init__(self, master , type, section, key, text):
         super().__init__(master)
         self.master = master
         # self.grid()
         # self.config_file = config_file
+        self.type = type
         self.config_section = section
         self.config_key = key
+        self.text = text
         
         self.create_widgets()
         self.configure_phaser_read()
     
     def create_widgets(self):
         # Label
-        self.label = tk.Label(self,width=15, text= f'{self.config_key} : ')
+        self.label = tk.Label(self,width=15, text= f'{self.text} : ')
         self.label.grid(row=0, column=0 ,sticky='we')
-        
         # Entry
         self.entry = tk.Entry(self, width=50)
         self.entry.grid(row=0, column=1)
-        
         # Button
-        self.button = tk.Button(self, text="Browse", command=self.save_folder_path)
+        self.button = tk.Button(self, text="Browse", command=lambda x = self.type : self.save_folder_path(x))
         self.button.grid(row=0, column=2)
-    
-    def save_folder_path(self):
+        
+    def save_folder_path(self,type):
         # 폴더 선택 대화상자 열기
-        folder_path = filedialog.askdirectory()
+        if type == 'folder':
+            folder_path = filedialog.askdirectory()
+        elif type == 'file':
+            folder_path = filedialog.askopenfilename()
+            
         if folder_path:
             # 엔트리에 선택한 경로 표시
             self.entry.delete(0, tk.END)
@@ -139,36 +181,66 @@ class SettingConfig(tk.Frame):
             # settings.ini 파일에 경로 저장
             ConfigureIni.write(self.config_section, self.config_key, folder_path)
             
-            
     def configure_phaser_read(self):
-    
         folder_path = ConfigureIni.read(self.config_section, self.config_key)
         if folder_path:
             self.entry.insert(0,folder_path)
-                
-           
-
-
+            
+                            
 class SettingsApp:
     def __init__(self, root):
         self.root = root
-        # self.root.title("Settings App")
-        
-        self.frame_setting = tk.LabelFrame(self.root, text='PDF 파일')
+        # self.root.title("Settings App")  
+        self.frame_setting = tk.Frame(self.root)
         self.frame_setting.grid(row=0, column=0)
         
-        
-        from_pdf_folder = SettingConfig(self.frame_setting, 'pdf parser','from_pdf_folder')
-        save_folder = SettingConfig(self.frame_setting, 'pdf parser','save_folder')
-        fax_save_folder = SettingConfig(self.frame_setting, 'fax','fax_save_folder')
-        # app = SettingsApp(a,'./settings.ini', 'pdf parser','toJpg')
-        
-        
-        from_pdf_folder.grid(row=0,column=0)
-        save_folder.grid(row=1,column=0)
-        fax_save_folder.grid(row=2,column=0)
+        self.setting_list = {
+            'pdf parser' : [ #section
+                ['folder','form_pdf_folder','PDF불러올 폴더'], # 설정타입, key, 화면에 보일 텍스트
+                ['folder','save_folder','저장할 폴더']
+            ],
+            'fax' : [
+                ['folder','fax_save_folder','수신팩스 폴더'],                
+                ['file','extension_viewer','뷰어 프로그램'],                
+                ['folder','fax_trash_bin_folder','팩스 휴지통 폴더'],
+                ['folder','archive_folder','팩스 보관 폴더']
+            ]
+                     
+        }
+        key_list = list(self.setting_list.keys())
+        row_index = 0
+        for key in key_list:
+            tk.Label(self.frame_setting ,text=f'[{key}]', justify='left').grid(row=row_index, column=0, columnspan=3 )
+            row_index += 1
+            for value in self.setting_list[key]:
+                self._make_widget(key , value[0], value[1], value[2], row_index)
+                row_index += 1
 
+        
+    def _make_widget(self, section, type, key , text , row):
+        print(section, type, key , text)
+        SettingConfig(self.frame_setting, type, section, key, text).grid(row=row, column=0)
+        # pas
 
+# class SettingsApp2:
+#     def __init__(self, root):
+#         self.root = root
+#         # self.root.title("Settings App")
+        
+#         self.frame_setting = tk.LabelFrame(self.root, text='PDF 파일')
+#         self.frame_setting.grid(row=0, column=0)
+        
+        
+#         from_pdf_folder = SettingConfig(self.frame_setting, 'pdf parser','from_pdf_folder')
+#         save_folder = SettingConfig(self.frame_setting, 'pdf parser','save_folder')
+#         fax_save_folder = SettingConfig(self.frame_setting, 'fax','fax_save_folder')
+#         # app = SettingsApp(a,'./settings.ini', 'pdf parser','toJpg')
+#         from_pdf_folder.grid(row=0,column=0)
+#         save_folder.grid(row=1,column=0)
+#         fax_save_folder.grid(row=2,column=0)
+
+    
+        
 # 프로그램 실행
 if __name__ == "__main__":
     root = tk.Tk()

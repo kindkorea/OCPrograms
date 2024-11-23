@@ -1,7 +1,7 @@
 import os
 import shutil
 import subprocess
-from settingFille import ConfigureIni
+from ConfigControlFile import ConfigureIni
 
 
 class LoggingMoveFile():

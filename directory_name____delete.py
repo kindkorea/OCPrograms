@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.messagebox as msgbox
 from tkinter import * # __all__
-import lib_movefile_________deleting
+# import lib_movefile_________deleting
 
 # import directory_name
 

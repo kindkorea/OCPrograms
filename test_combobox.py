@@ -1,8 +1,3 @@
+import test_event
 
-
-a = False
-
-if a : 
-    print("ok")
-else :
-    print("bad")
+global 

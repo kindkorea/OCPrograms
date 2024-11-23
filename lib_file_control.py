@@ -1,7 +1,7 @@
 import os
 import datetime
 import subprocess
-from settingFille import ConfigureIni
+from ConfigControlFile import ConfigureIni
 import shutil
 class FaxFileControl():
     

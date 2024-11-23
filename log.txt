@@ -1,7 +1,8 @@
-FAILED : adfadfa_2024-11-08.jpg = 		 KEY
-FAILED : FAX_0616815206_20241115_124847.jpg = 		 KEY
+SUCCESS : [v]단가표_벽산인슈테크_2024-11-08#1.jpg	=>	C:/Users/kindk/OneDrive/OCWOOD_OFFICE/002_매입처/01_수신팩스\단가표
+SUCCESS : [v]단가표_벽산인슈테크_2024-11-08.jpg	=>	C:/Users/kindk/OneDrive/OCWOOD_OFFICE/002_매입처/01_수신팩스\단가표
+FAILED : FAX_151801099671324_20241123_074347.jpg = 		 KEY
 FAILED : [v]안녕_2024-11-11 - 복사본 (2).jpg = 		 dst folder
 FAILED : [v]안녕_2024-11-11.jpg = 		 dst folder
-FAILED : [v]안녕_2024-11-12.jpg = 		 dst folder
 FAILED : [v]안녕_2024-11-13.jpg = 		 dst folder
-FAILED : 안녕_2024-11-08#0.jpg = 		 KEY
+FAILED : 대한테이프__2024-11-15.jpg = 		 KEY
+FAILED : 사업자_케이에스건설 주식회사_2024-11-12.jpg = 		 KEY

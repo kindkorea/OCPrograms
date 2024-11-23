@@ -10,7 +10,7 @@ import gui_calculator
 import gui_Utilities
 import gui_pdf2jpg
 import win32clipboard
-import settingFille
+import ConfigControlFile
 
 
         
@@ -26,7 +26,7 @@ class ControlFrame():
         
         gui_Utilities.Utilities(self.contentFaxFrame)
         gui_calculator.Calculators(self.contentMarginCalc)
-        settingFille.SettingsApp(self.settings)
+        ConfigControlFile.SettingsApp(self.settings)
         self.menu_list = {
             0 : ['컨버터 및 팩스'],
             1 : ['마진 계산기'],
@@ -39,11 +39,8 @@ class ControlFrame():
             e = Button(self.topMenuFrame , text=self.menu_list[key][self.NUMBER_TITLE],command=lambda x=key: [self.change_frame(x)])
             e.grid(row=0, column=ix)
             
-            # Button(f , text='app2',command=lambda x=1 : self.change_frame(x)).grid(row=0, column=1)
-            
         self.topMenuFrame.grid(row=0, column=0 , sticky='w' , pady=20)
         
-        # self.grid(column=0, row=0, padx=5, pady=5, sticky='ew')
         
         self.frames = {}
 
@@ -65,7 +62,7 @@ class ControlFrame():
 if __name__ == "__main__":
     app = tk.Tk()
     app.title('웅천목재 프로그램 v.1')
-    app.geometry('600x800+1850+10')
+    app.geometry('600x900+1850+10')
     ControlFrame(app)
         
     app.mainloop()

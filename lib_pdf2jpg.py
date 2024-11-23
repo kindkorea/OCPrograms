@@ -3,7 +3,7 @@ import PIL
 from PIL import Image
 import win32clipboard
 import os
-from settingFille import ConfigureIni
+from ConfigControlFile import ConfigureIni
 
 
 from pdf2image import convert_from_path
