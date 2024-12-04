@@ -62,8 +62,9 @@ class FaxFileControl():
         try : 
             file_path = os.path.join(file_path,src_file)
             
-            cmd = f'{self.extension_viewer} {file_path}'
-            subprocess.Popen(cmd)
+            # cmd = f'{self.extension_viewer} {file_path}'
+            # subprocess.Popen(cmd)
+            os.startfile(file_path)
         
         except FileNotFoundError :
             print(f'Error: The file {src_file} does not exist.')

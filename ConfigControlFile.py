@@ -103,44 +103,6 @@ class ConfigureIni():
         if read_file : 
             # config.read(config_file, encoding='utf-8')
             return json.loads(read_file)
-
-
-
-# class SettingConfig2(tk.Frame):
-#     def __init__(self, master , section, key):
-#         super().__init__(master)
-#         self.master = master
-#         # self.grid()
-#         # self.config_file = config_file
-#         self.config_section = section
-#         self.config_key = key
-        
-#         self.create_widgets()
-#         self.configure_phaser_read()
-    
-#     def create_widgets(self):
-#         # Label
-#         self.label = tk.Label(self,width=15, text= f'{self.config_key} : ')
-#         self.label.grid(row=0, column=0 ,sticky='we')
-#         # Entry
-#         self.entry = tk.Entry(self, width=50)
-#         self.entry.grid(row=0, column=1)
-#         # Button
-#         self.button = tk.Button(self, text="Browse", command=self.save_folder_path)
-#         self.button.grid(row=0, column=2)
-#     def save_folder_path(self):
-#         # 폴더 선택 대화상자 열기
-#         folder_path = filedialog.askdirectory()
-#         if folder_path:
-#             # 엔트리에 선택한 경로 표시
-#             self.entry.delete(0, tk.END)
-#             self.entry.insert(0, folder_path)
-#             # settings.ini 파일에 경로 저장
-#             ConfigureIni.write(self.config_section, self.config_key, folder_path)
-#     def configure_phaser_read(self):
-#         folder_path = ConfigureIni.read(self.config_section, self.config_key)
-#         if folder_path:
-#             self.entry.insert(0,folder_path)
                 
 class SettingConfig(tk.Frame):
     def __init__(self, master , type, section, key, text):
@@ -196,7 +158,7 @@ class SettingsApp:
         
         self.setting_list = {
             'pdf parser' : [ #section
-                ['folder','form_pdf_folder','PDF불러올 폴더'], # 설정타입, key, 화면에 보일 텍스트
+                ['folder','from_pdf_folder','PDF불러올 폴더'], # 설정타입, key, 화면에 보일 텍스트
                 ['folder','save_folder','저장할 폴더']
             ],
             'fax' : [

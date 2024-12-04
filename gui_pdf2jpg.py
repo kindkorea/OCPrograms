@@ -9,6 +9,8 @@ import datetime
 # import win32clipboard
 import threading
 
+
+
 class Pdf2jpg():
     def __init__(self, containerFrame):
         # super().__init__(container)
@@ -43,7 +45,7 @@ class Pdf2jpg():
         
         Button(self.top_innerframe, text='JPG변환', command=self._btn_pdf2jpg).grid(column=4, row=0,  padx= 5, pady= 5,sticky=tk.E )
         Button(self.top_innerframe, text='이름 변환', command=self._btn_rename).grid(column=6, row=0, padx= 5, pady= 5, sticky=tk.E)
-        Button(self.top_innerframe, text='폴더 열기', command=self.P2J._open_folder).grid(column=7, row=0, padx= 5, pady= 5, sticky=tk.E)
+        Button(self.top_innerframe, text='폴더 열기', command=self.P2J._open_folder).grid(column  =7, row=0, padx= 5, pady= 5, sticky=tk.E)
         
         self.selected_file = Label(self.top_innerframe,text='........',justify="left")
         self.selected_file.grid(row=1,column=0, columnspan=8)

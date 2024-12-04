@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 import ConfigControlFile
 import lib_file_control 
-
+import pyperclip
         
 class GUI_FaxReceive():
     def __init__(self, containerFrame):
@@ -26,6 +26,8 @@ class GUI_FaxReceive():
         """
         self.companies = ConfigControlFile.JsonReader.read('companies_name.json')['companies_name']
         self.bookmarked_companies = ConfigControlFile.JsonReader.read('companies_name.json')['bookmarked_companies_name']
+        self.companies.sort()
+        self.bookmarked_companies.sort()
         self.fax_root_folder = ConfigControlFile.ConfigureIni.read('fax','fax_save_folder')
         self.fax_archive_folder = ConfigControlFile.ConfigureIni.read('fax','archive_folder')
         self.fax_control = lib_file_control.FaxFileControl()
@@ -79,6 +81,7 @@ class GUI_FaxReceive():
 
         # 폴더 오픈하기
         self.btn_folder_open = Button(self.frame_mid, text='폴더열기', command=self._handler_btn_fax_folder_open).grid(row=0, column=4)   
+        self.btn_folder_open = Button(self.frame_mid, text='수수료빼기', command=self._handler_btn_without_pee).grid(row=0, column=5)   
 
         # 라디오 버튼 생성
         # self.radio_var = StringVar()
@@ -388,7 +391,23 @@ class GUI_FaxReceive():
                 self.file_listbox.delete(0,END)
                 self._setting_list_in_listbox(file_list, True)
                 self.current_folder = folder_path
-                
+    def _handler_btn_without_pee(self):
+        """
+        수수료 차감 후 금액 자동 클립보드로 복사하기
+        Args: 
+        
+        Returns:
+        """
+    
+        entry_value = self.entry_changingName.get()
+        if entry_value : 
+            entry_value = entry_value.replace(',','')
+            entry_value = entry_value.split('/')[0]
+            self.entry_changingName.delete(0,END)
+            pyperclip.copy(int(entry_value) - 500)
+            
+    
+                    
     def _handler_btn_companies_bookmark(self):
         """
         하단 버튼의 즐겨찾기 추가 // 삭제
